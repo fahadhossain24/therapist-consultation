@@ -4,11 +4,10 @@ import adminServices from './admin.services';
 import CustomError from '../../errors';
 import sendResponse from '../../../shared/sendResponse';
 import { StatusCodes } from 'http-status-codes';
-import fileUploader from '../../../utils/fileUploader';
-import { FileArray } from 'express-fileupload';
+import asyncHandler from '../../../shared/asyncHandler';
 
 // controller for create new admin
-const createAdmin = async (req: Request, res: Response) => {
+const createAdmin = asyncHandler(async (req: Request, res: Response) => {
   const adminData = req.body;
 
   const admin = await adminServices.createAdmin(adminData);
@@ -24,10 +23,10 @@ const createAdmin = async (req: Request, res: Response) => {
     message: 'Admin creation successfull',
     data: adminInfoAcceptPass,
   });
-};
+});
 
 // controller for get all admin
-const getAllAdmin = async (req: Request, res: Response) => {
+const getAllAdmin = asyncHandler(async (req: Request, res: Response) => {
   const admins = await adminServices.getAllAdmin();
   const adminsAcceptSuperAdmin = admins.filter((admin) => admin.role !== 'super-admin');
 
@@ -37,10 +36,10 @@ const getAllAdmin = async (req: Request, res: Response) => {
     message: 'Admin retrive successfull',
     data: adminsAcceptSuperAdmin,
   });
-};
+});
 
 // controller for get specific admin
-const getSpecificAdmin = async (req: Request, res: Response) => {
+const getSpecificAdmin = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const admin = await adminServices.getSpecificAdmin(id);
   if (!admin) {
@@ -53,10 +52,10 @@ const getSpecificAdmin = async (req: Request, res: Response) => {
     message: 'Admin found successfull',
     data: admin,
   });
-};
+});
 
 // controller for update specific admin
-const updateSpecificAdmin = async (req: Request, res: Response) => {
+const updateSpecificAdmin = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const data = req.body;
   if (data.password || data.email) {
@@ -74,10 +73,10 @@ const updateSpecificAdmin = async (req: Request, res: Response) => {
     status: 'success',
     message: 'Admin update successfull',
   });
-};
+});
 
 // controller for delete specific admin
-const deleteSpecificAdmin = async (req: Request, res: Response) => {
+const deleteSpecificAdmin = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const admin = await adminServices.deleteSpecificAdmin(id);
   if (!admin.deletedCount) {
@@ -89,7 +88,7 @@ const deleteSpecificAdmin = async (req: Request, res: Response) => {
     status: 'success',
     message: 'Admin delete successfull',
   });
-};
+});
 
 export default {
   createAdmin,

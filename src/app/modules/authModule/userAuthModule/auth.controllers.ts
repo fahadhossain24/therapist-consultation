@@ -9,9 +9,10 @@ import IdGenerator from '../../../../utils/IdGenerator';
 import sendMail from '../../../../utils/sendEmail';
 import User from '../../userModule/user.model';
 import CustomError from '../../../errors';
+import asyncHandler from '../../../../shared/asyncHandler';
 
 // controller for user/outlet login
-const userLogin = async (req: Request, res: Response) => {
+const userLogin = asyncHandler(async (req: Request, res: Response) => {
   const { email, password, isSocial, fcmToken } = req.body;
 
   const user = await authServices.getUserByEmail(email);
@@ -35,7 +36,7 @@ const userLogin = async (req: Request, res: Response) => {
   // generate token
   const payload = {
     email: user.email,
-    roles: user.roles,
+    role: user.role,
   };
 
   const accessToken = jwtHelpers.createToken(
@@ -51,10 +52,11 @@ const userLogin = async (req: Request, res: Response) => {
   );
 
   const userInfo = {
-    fullName: user.fullName,
+    firstName: user.firstName,
+    lastName: user.lastName,
     email: user.email,
     _id: user._id,
-    role: user.roles,
+    role: user.role,
     accessToken,
     refreshToken,
     isEmailVerified: isSocial ? true : user.isEmailVerified,
@@ -66,10 +68,10 @@ const userLogin = async (req: Request, res: Response) => {
     message: `User login successfull`,
     data: userInfo,
   });
-};
+});
 
 // controller for resend email verification code
-const resendEmailVerificationCode = async (req: Request, res: Response) => {
+const resendEmailVerificationCode = asyncHandler(async (req: Request, res: Response) => {
   const { email } = req.body;
   const code = IdGenerator.generateNumberId();
   const expireDate = new Date();
@@ -105,10 +107,10 @@ const resendEmailVerificationCode = async (req: Request, res: Response) => {
     status: 'success',
     message: 'Email verification code resend successfull',
   });
-};
+});
 
 // controller for verify email
-const userEmailVerify = async (req: Request, res: Response) => {
+const userEmailVerify = asyncHandler(async (req: Request, res: Response) => {
   const { email, code } = req.body;
 
   const user = await authServices.getUserByEmail(email);
@@ -140,10 +142,10 @@ const userEmailVerify = async (req: Request, res: Response) => {
     status: 'success',
     message: 'Email verification successfull',
   });
-};
+});
 
 // controller for send otp
-const sendOTP = async (req: Request, res: Response) => {
+const sendOTP = asyncHandler(async (req: Request, res: Response) => {
   const { email } = req.body;
   if (!email) {
     throw new CustomError.BadRequestError('Missing data in request body!');
@@ -194,10 +196,10 @@ const sendOTP = async (req: Request, res: Response) => {
     status: 'success',
     message: 'Password reset OTP sended successfull.',
   });
-};
+});
 
 // controller for verify otp
-const verifyOTP = async (req: Request, res: Response) => {
+const verifyOTP = asyncHandler(async (req: Request, res: Response) => {
   const { email, otp } = req.body;
   if (!email || !otp) {
     throw new CustomError.BadRequestError('Missing data in request body!');
@@ -224,10 +226,10 @@ const verifyOTP = async (req: Request, res: Response) => {
     status: 'success',
     message: 'OTP match successfull',
   });
-};
+});
 
 // controller for reset password
-const resetPassword = async (req: Request, res: Response) => {
+const resetPassword = asyncHandler(async (req: Request, res: Response) => {
   const { email, newPassword } = req.body;
   if (!email || !newPassword) {
     throw new CustomError.BadRequestError('Missing data in request body!');
@@ -246,10 +248,10 @@ const resetPassword = async (req: Request, res: Response) => {
     status: 'success',
     message: 'Password reset successfull',
   });
-};
+});
 
 // controller for change password
-const changePassword = async (req: Request, res: Response) => {
+const changePassword = asyncHandler(async (req: Request, res: Response) => {
   const { email, oldPassword, newPassword } = req.body;
 
   const userExistance = await authServices.getUserByEmail(email);
@@ -271,10 +273,10 @@ const changePassword = async (req: Request, res: Response) => {
     status: 'success',
     message: 'Password change successfull',
   });
-};
+});
 
 // controller for get access token by refresh token
-const getAccessTokenByRefreshToken = async (req: Request, res: Response) => {
+const getAccessTokenByRefreshToken = asyncHandler(async (req: Request, res: Response) => {
   const { refresh_token } = req.body;
   const actualRefreshToken = refresh_token.split(' ')[1];
 
@@ -291,7 +293,7 @@ const getAccessTokenByRefreshToken = async (req: Request, res: Response) => {
 
   const payload = {
     email: user.email,
-    roles: user.roles,
+    roles: user.role,
   };
 
   const newAccessToken = jwtHelpers.createToken(
@@ -309,7 +311,7 @@ const getAccessTokenByRefreshToken = async (req: Request, res: Response) => {
       refreshToken: actualRefreshToken,
     },
   });
-};
+});
 
 export default {
   userLogin,

@@ -9,9 +9,14 @@ import jwtHelpers from '../../../healpers/healper.jwt';
 import config from '../../../config';
 import fileUploader from '../../../utils/fileUploader';
 import { FileArray } from 'express-fileupload';
+import asyncHandler from '../../../shared/asyncHandler';
+import patientProfileServices from '../profileModule/patientProfile/patientProfile.services';
+import therapistProfileServices from '../profileModule/therapistProfile/therapistProfile.services';
+import mongoose from 'mongoose';
+import { slotsPerDayOfAvailities } from './user.utils';
 
 // controller for create new user
-const createUser = async (req: Request, res: Response) => {
+const createUser = asyncHandler(async (req: Request, res: Response) => {
   const userData = req.body;
   const files = req.files;
 
@@ -19,31 +24,77 @@ const createUser = async (req: Request, res: Response) => {
   expireDate.setMinutes(expireDate.getMinutes() + 30);
 
   userData.verification = {
-    code: IdGenerator.generateId(),
+    code: IdGenerator.generateNumberId(),
     expireDate,
   };
 
   // token for social user
-  let accessToken, refreshToken;
+  let profile, accessToken, refreshToken;
   if (userData.isSocial) {
     userData.isEmailVerified = true;
 
     const payload = {
       email: userData.email,
-      role: 'user',
+      role: userData.role,
     };
     accessToken = jwtHelpers.createToken(payload, config.jwt_access_token_secret as string, config.jwt_access_token_expiresin as string);
     refreshToken = jwtHelpers.createToken(payload, config.jwt_refresh_token_secret as string, config.jwt_refresh_token_expiresin as string);
   }
 
-  if (files) {
-    const userImagePath = await fileUploader(files as FileArray, `user-image`, 'image');
-    userData.image = userImagePath;
+  if (userData.role === 'patient') {
+    if (files && files.image) {
+      const userImagePath = await fileUploader(files as FileArray, `user-image`, 'image');
+      userData.image = userImagePath;
+    }
+
+    profile = await patientProfileServices.createPatientProfile(userData);
+  }
+
+  if (userData.role === 'therapist') {
+    if (files && files.curriculumVitae) {
+      const curriculumVitaePath = await fileUploader(files as FileArray, `curriculum-vitae`, 'curriculumVitae');
+      userData.curriculumVitae = curriculumVitaePath;
+    }
+    if (files && files.certificates) {
+      const certificatesPath = await fileUploader(files as FileArray, `certificates`, 'certificates');
+      userData.certificates = certificatesPath;
+    }
+    if (files && files.brandLogo) {
+      const brandLogoPath = await fileUploader(files as FileArray, `brand-logo`, 'brandLogo');
+      userData.brandLogo = brandLogoPath;
+    }
+    if (files && files.image) {
+      const imagePath = await fileUploader(files as FileArray, `image`, 'image');
+      userData.image = imagePath;
+    }
+
+    const chargePerHour = JSON.parse(userData.chargePerHour);
+    const availabilities = JSON.parse(userData.availabilities);
+
+    availabilities.forEach((day: any) => {
+      if (!day.isClosed) {
+        day.slotsPerDay = slotsPerDayOfAvailities(day);
+      }
+    });
+    userData.availabilities = availabilities;
+    userData.chargePerHour = chargePerHour;
+    // console.log(userData)
+
+    profile = await therapistProfileServices.createTherapistProfile(userData);
+  }
+
+  if (profile) {
+    userData.profile = profile._id;
   }
 
   const user = await userServices.createUser(userData);
   if (!user) {
     throw new CustomError.BadRequestError('Failed to create new user!');
+  }
+
+  if (profile) {
+    profile.user = new mongoose.Types.ObjectId(user._id as string);
+    await profile.save();
   }
 
   const { password, ...userInfoAcceptPass } = user.toObject();
@@ -56,7 +107,7 @@ const createUser = async (req: Request, res: Response) => {
     const mailOptions = {
       from: config.gmail_app_user as string,
       to: userData.email,
-      subject: 'JoinUp - Email Verification',
+      subject: 'Counta - Email Verification',
       text: content,
     };
 
@@ -69,10 +120,10 @@ const createUser = async (req: Request, res: Response) => {
     message: 'User creation successfull',
     data: { ...userInfoAcceptPass, accessToken, refreshToken },
   });
-};
+});
 
 // service for get specific user by id
-const getSpecificUser = async (req: Request, res: Response) => {
+const getSpecificUser = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const user = await userServices.getSpecificUser(id);
   if (!user) {
@@ -85,9 +136,10 @@ const getSpecificUser = async (req: Request, res: Response) => {
     message: 'User retrive successfull',
     data: user,
   });
-};
+});
+
 // service for get specific user by id
-const getAllUser = async (req: Request, res: Response) => {
+const getAllUser = asyncHandler(async (req: Request, res: Response) => {
   const users = await userServices.getAllUser();
 
   sendResponse(res, {
@@ -96,13 +148,14 @@ const getAllUser = async (req: Request, res: Response) => {
     message: 'User retrive successfull',
     data: users,
   });
-};
+});
 
 // controller for delete specific user
-const deleteSpecificUser = async (req: Request, res: Response) => {
+const deleteSpecificUser = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const user = await userServices.deleteSpecificUser(id);
-  if (!user.deletedCount) {
+  const { role } = req.user!;
+  const isDelete = await userServices.deleteSpecificUser(id, role);
+  if (!isDelete) {
     throw new CustomError.BadRequestError('Failed to delete user!');
   }
 
@@ -111,26 +164,76 @@ const deleteSpecificUser = async (req: Request, res: Response) => {
     status: 'success',
     message: 'User delete successfull',
   });
-};
+});
 
 // controller for update specific user
-const updateSpecificUser = async (req: Request, res: Response) => {
+const updateSpecificUser = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const data = req.body;
+  const userData = req.body;
   const files = req.files;
 
-  if (data.password || data.email || data.isEmailVerified) {
+  const { role } = req.user!;
+
+  if (userData.password || userData.email || userData.isEmailVerified) {
     throw new CustomError.BadRequestError("You can't update email, verified status and password directly!");
   }
 
-  if (files) {
-    const userImagePath = await fileUploader(files as FileArray, `user-image`, 'image');
-    data.image = userImagePath;
+  // if (files) {
+  //   const userImagePath = await fileUploader(files as FileArray, `user-image`, 'image');
+  //   userData.image = userImagePath;
+  // }
+  let updatedProfile;
+
+  if (role === 'patient') {
+    if (files && files.image) {
+      const userImagePath = await fileUploader(files as FileArray, `user-image`, 'image');
+      userData.image = userImagePath;
+    }
+
+    updatedProfile = await patientProfileServices.updatePatientProfileByuserId(id, userData);
   }
 
-  const updatedUser = await userServices.updateSpecificUser(id, data);
-  if (!updatedUser.modifiedCount) {
+  if (role === 'therapist') {
+    const therapistProfile = await therapistProfileServices.getTherapistProfileByUserId(id)
+    if (files && files.curriculumVitae) {
+      const curriculumVitaePath = await fileUploader(files as FileArray, `curriculum-vitae`, 'curriculumVitae');
+      userData.curriculumVitae = curriculumVitaePath;
+    }
+    if (files && files.certificates) {
+      const certificatesPath = await fileUploader(files as FileArray, `certificates`, 'certificates');
+      userData.certificates = certificatesPath;
+    }
+    if (files && files.brandLogo) {
+      const brandLogoPath = await fileUploader(files as FileArray, `brand-logo`, 'brandLogo');
+      userData.brandLogo = brandLogoPath;
+    }
+    if (files && files.image) {
+      const imagePath = await fileUploader(files as FileArray, `image`, 'image');
+      userData.image = imagePath;
+    }
+
+    const chargePerHour = userData.chargePerHour ? JSON.parse(userData.chargePerHour) : therapistProfile?.chargePerHour;
+    const availabilities = userData.availabilities ? JSON.parse(userData.availabilities) : therapistProfile?.availabilities;
+
+    availabilities.forEach((day: any) => {
+      if (!day.isClosed) {
+        day.slotsPerDay = slotsPerDayOfAvailities(day);
+      }
+    });
+    userData.availabilities = availabilities;
+    userData.chargePerHour = chargePerHour;
+console.log("userData...........", userData)
+    updatedProfile = await therapistProfileServices.updateTherapistProfileByuserId(id, userData);
+  }
+// console.log(userData)
+  const updatedUser = await userServices.updateSpecificUser(id, userData);
+  // console.log(updatedUser, updatedProfile)
+  if (!updatedUser?.isModified) {
     throw new CustomError.BadRequestError('Failed to update user!');
+  }
+
+  if (!updatedProfile?.isModified) {
+    throw new CustomError.BadRequestError('Failed to update user profile!');
   }
 
   sendResponse(res, {
@@ -138,12 +241,14 @@ const updateSpecificUser = async (req: Request, res: Response) => {
     status: 'success',
     message: 'User modified successfull',
   });
-};
+});
 
 // controller for change profile image of specific user
-const changeUserProfileImage = async (req: Request, res: Response) => {
+const changeUserProfileImage = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const files = req.files;
+  const { role } = req.user!;
+
   // console.log(files)
   const user = await userServices.getSpecificUser(id);
   // console.log(req.files)
@@ -151,12 +256,22 @@ const changeUserProfileImage = async (req: Request, res: Response) => {
     throw new CustomError.NotFoundError('No user found!');
   }
 
-  const userImagePath = await fileUploader(files as FileArray, `user-image`, 'image');
-  const updateUser = await userServices.updateSpecificUser(id, {
-    image: userImagePath as string,
-  });
+  let updateUser;
 
-  if (!updateUser.modifiedCount) {
+  const userImagePath = await fileUploader(files as FileArray, `user-image`, 'image');
+  if (role === 'patient') {
+    updateUser = await patientProfileServices.updatePatientProfileByuserId(id, {
+      image: userImagePath as string,
+    });
+  } else if (role === 'therapist') {
+    updateUser = await therapistProfileServices.updateTherapistProfileByuserId(id, {
+      image: userImagePath as string,
+    });
+  } else {
+    throw new CustomError.BadRequestError('Invalid role!');
+  }
+
+  if (!updateUser?.isModified) {
     throw new CustomError.BadRequestError('Failed to change user profile image!');
   }
 
@@ -165,7 +280,7 @@ const changeUserProfileImage = async (req: Request, res: Response) => {
     status: 'success',
     message: 'User profile change successfull',
   });
-};
+});
 
 export default {
   createUser,

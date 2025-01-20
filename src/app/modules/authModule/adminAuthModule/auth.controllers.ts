@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import adminServices from '../../adminModule/admin.services';
 import CustomError from '../../../errors';
 import jwtHelpers from '../../../../healpers/healper.jwt';
 import config from '../../../../config';
@@ -9,9 +8,11 @@ import { StatusCodes } from 'http-status-codes';
 import IdGenerator from '../../../../utils/IdGenerator';
 import sendMail from '../../../../utils/sendEmail';
 import Admin from '../../adminModule/admin.model';
+import asyncHandler from '../../../../shared/asyncHandler';
+import adminServices from '../../adminModule/admin.services';
 
 // controller for admin login
-const adminLogin = async (req: Request, res: Response) => {
+const adminLogin = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const admin = await adminServices.getAdminByEmail(email);
 
@@ -55,10 +56,10 @@ const adminLogin = async (req: Request, res: Response) => {
     message: 'Login successfull',
     data: adminInfo,
   });
-};
+});
 
 // controller for send otp to admin
-const sendOTP = async (req: Request, res: Response) => {
+const sendOTP = asyncHandler(async (req: Request, res: Response) => {
   const { email } = req.body;
   if (!email) {
     throw new CustomError.BadRequestError('Missing data in request body!');
@@ -109,10 +110,10 @@ const sendOTP = async (req: Request, res: Response) => {
     status: 'success',
     message: 'Password reset OTP sended successfull.',
   });
-};
+});
 
 // controller for verify otp
-const verifyOTP = async (req: Request, res: Response) => {
+const verifyOTP = asyncHandler(async (req: Request, res: Response) => {
   const { email, otp } = req.body;
   if (!email || !otp) {
     throw new CustomError.BadRequestError('Missing data in request body!');
@@ -138,10 +139,10 @@ const verifyOTP = async (req: Request, res: Response) => {
     status: 'success',
     message: 'OTP match successfull',
   });
-};
+});
 
 // controller for reset password
-const resetPassword = async (req: Request, res: Response) => {
+const resetPassword = asyncHandler(async (req: Request, res: Response) => {
   const { email, newPassword } = req.body;
   if (!email || !newPassword) {
     throw new CustomError.BadRequestError('Missing data in request body!');
@@ -160,10 +161,10 @@ const resetPassword = async (req: Request, res: Response) => {
     status: 'success',
     message: 'Password reset successfull',
   });
-};
+});
 
 // controller for change password
-const changePassword = async (req: Request, res: Response) => {
+const changePassword = asyncHandler(async (req: Request, res: Response) => {
   const { email, oldPassword, newPassword } = req.body;
 
   const admin = await adminServices.getAdminByEmail(email);
@@ -185,12 +186,12 @@ const changePassword = async (req: Request, res: Response) => {
     status: 'success',
     message: 'Password change successfull',
   });
-};
+});
 
 export default {
-    adminLogin,
-    sendOTP,
-    verifyOTP,
-    resetPassword,
-    changePassword
-}
+  adminLogin,
+  sendOTP,
+  verifyOTP,
+  resetPassword,
+  changePassword,
+};

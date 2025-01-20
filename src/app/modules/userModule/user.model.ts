@@ -1,14 +1,12 @@
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import IUser from './user.interface';
 import validator from 'validator';
 import bcrypt from 'bcrypt';
 
 const userSchema = new mongoose.Schema<IUser>(
   {
-    fullName: {
-      type: String,
-      required: true,
-    },
+    firstName: String,
+    lastName: String,
     email: {
       type: String,
       unique: true,
@@ -35,11 +33,14 @@ const userSchema = new mongoose.Schema<IUser>(
       type: Boolean,
       default: false,
     },
-    roles: [{
+    role: {
       type: String,
-      enum: ['Volunteer', 'Organizer', 'Administrator'],
-      default: 'Volunteer',
-    }],
+      enum: {
+        values: ['patient', 'therapist'],
+        message: '{VALUE} is not accepted as a role value. Use patient/therapist.',
+      },
+      required: true,
+    },
     status: {
       type: String,
       enum: {
@@ -47,10 +48,6 @@ const userSchema = new mongoose.Schema<IUser>(
         message: '{VALUE} is not accepted as a status value. Use active/blocked/disabled.',
       },
       default: 'active',
-    },
-    image: {
-      type: String,
-      default: '',
     },
     verification: {
       code: {
@@ -62,12 +59,6 @@ const userSchema = new mongoose.Schema<IUser>(
         default: null,
       },
     },
-    cords: {
-      lat: Number,
-      lng: Number,
-    },
-    address: String,
-      
     isSocial: {
       type: Boolean,
       default: false,
@@ -76,13 +67,9 @@ const userSchema = new mongoose.Schema<IUser>(
       type: String,
       default: null,
     },
-    totalVolunteeHours: {
-      type: String,
-      default: null,
-    },
-    topDistance: {
-      type: String,
-      default: null,
+    profile: {
+      type: mongoose.Schema.Types.ObjectId,
+      refPath: 'role'
     }
   },
   {
@@ -110,6 +97,8 @@ userSchema.methods.comparePassword = function (userPlanePassword: string) {
 userSchema.methods.compareVerificationCode = function (userPlaneCode: string) {
   return bcrypt.compareSync(userPlaneCode, this.verification.code);
 };
+
+
 
 const User = mongoose.model<IUser>('user', userSchema);
 export default User;

@@ -66,6 +66,7 @@ adminSchema.pre('save', function (next) {
 });
 
 adminSchema.methods.comparePassword = function (adminPlanePassword: string) {
+  console.log(adminPlanePassword, this.password)
   return bcrypt.compareSync(adminPlanePassword, this.password);
 };
 
