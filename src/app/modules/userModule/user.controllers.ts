@@ -194,7 +194,7 @@ const updateSpecificUser = asyncHandler(async (req: Request, res: Response) => {
   }
 
   if (role === 'therapist') {
-    const therapistProfile = await therapistProfileServices.getTherapistProfileByUserId(id)
+    const therapistProfile = await therapistProfileServices.getTherapistProfileByUserId(id);
     if (files && files.curriculumVitae) {
       const curriculumVitaePath = await fileUploader(files as FileArray, `curriculum-vitae`, 'curriculumVitae');
       userData.curriculumVitae = curriculumVitaePath;
@@ -222,10 +222,10 @@ const updateSpecificUser = asyncHandler(async (req: Request, res: Response) => {
     });
     userData.availabilities = availabilities;
     userData.chargePerHour = chargePerHour;
-console.log("userData...........", userData)
+
     updatedProfile = await therapistProfileServices.updateTherapistProfileByuserId(id, userData);
   }
-// console.log(userData)
+  // console.log(userData)
   const updatedUser = await userServices.updateSpecificUser(id, userData);
   // console.log(updatedUser, updatedProfile)
   if (!updatedUser?.isModified) {

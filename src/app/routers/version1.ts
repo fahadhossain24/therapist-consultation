@@ -7,6 +7,9 @@ import aboutUsRouter from '../modules/aboutUsModule/abountUs.routes';
 import privacyPolicyRouter from '../modules/privacyPolicyModule/privacyPolicy.routes';
 import termsConditionRouter from '../modules/termsConditionModule/termsCondition.routes';
 import sliderRouter from '../modules/sliderModule/slider.routes';
+import specialityRouter from '../modules/specialityModule/speciality.routes';
+import subscriptionRouter from '../modules/subscriptionModule/subscription.routes';
+import messageCostRouter from '../modules/messageCostModule/messageCost.routes';
 
 const routersVersionOne = express.Router();
 
@@ -23,5 +26,11 @@ routersVersionOne.use('/slider', sliderRouter)
 routersVersionOne.use('/about-us', aboutUsRouter)
 routersVersionOne.use('/privacy-policy', privacyPolicyRouter)
 routersVersionOne.use('/terms-condition', termsConditionRouter)
+
+// admin
+routersVersionOne.use('/speciality', specialityRouter)
+routersVersionOne.use('/subscription', subscriptionRouter)
+routersVersionOne.use('/messageCost', messageCostRouter)
+
 
 export default routersVersionOne;
