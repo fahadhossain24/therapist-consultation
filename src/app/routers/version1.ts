@@ -10,6 +10,7 @@ import sliderRouter from '../modules/sliderModule/slider.routes';
 import specialityRouter from '../modules/specialityModule/speciality.routes';
 import subscriptionRouter from '../modules/subscriptionModule/subscription.routes';
 import messageCostRouter from '../modules/messageCostModule/messageCost.routes';
+import notificationRouter from '../modules/notificationModule/notification.routes';
 
 const routersVersionOne = express.Router();
 
@@ -20,6 +21,9 @@ routersVersionOne.use('/admin', adminRouter);
 // auth
 routersVersionOne.use('/user/auth', userAuthRouter);
 routersVersionOne.use('/admin/auth', adminAuthRouter);
+
+// app
+routersVersionOne.use('/notification', notificationRouter)
 
 // settings
 routersVersionOne.use('/slider', sliderRouter)
