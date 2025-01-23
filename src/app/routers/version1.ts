@@ -11,6 +11,7 @@ import specialityRouter from '../modules/specialityModule/speciality.routes';
 import subscriptionRouter from '../modules/subscriptionModule/subscription.routes';
 import messageCostRouter from '../modules/messageCostModule/messageCost.routes';
 import notificationRouter from '../modules/notificationModule/notification.routes';
+import bankInfoRouter from '../modules/bankInfoModule/bankInfo.routes';
 
 const routersVersionOne = express.Router();
 
@@ -24,6 +25,7 @@ routersVersionOne.use('/admin/auth', adminAuthRouter);
 
 // app
 routersVersionOne.use('/notification', notificationRouter)
+routersVersionOne.use('/bank-info', bankInfoRouter)
 
 // settings
 routersVersionOne.use('/slider', sliderRouter)

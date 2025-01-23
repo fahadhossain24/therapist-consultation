@@ -13,7 +13,7 @@ specialityRouter.post(
   specialityController.createSpeciality,
 );
 
-specialityRouter.get('/retrive/search', authentication('admin', 'super-admin'), specialityController.getSpecialities);
+specialityRouter.get('/retrive/search', authentication('admin', 'super-admin', 'patient', 'therapist'), specialityController.getSpecialities);
 
 specialityRouter.patch(
   '/update/:id',
