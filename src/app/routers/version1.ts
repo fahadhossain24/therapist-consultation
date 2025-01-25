@@ -12,6 +12,10 @@ import subscriptionRouter from '../modules/subscriptionModule/subscription.route
 import messageCostRouter from '../modules/messageCostModule/messageCost.routes';
 import notificationRouter from '../modules/notificationModule/notification.routes';
 import bankInfoRouter from '../modules/bankInfoModule/bankInfo.routes';
+import paymentHistoryRouter from '../modules/paymentHistoryModule/paymentHistory.routes';
+import invoiceRouter from '../modules/invoiceModule/invoice.routes';
+import contactUsRouter from '../modules/contactUsModule/contactUs.routes';
+import purchaseSubscriptionRouter from '../modules/purchaseSubscriptionModule/purchaseSubscription.routes';
 
 const routersVersionOne = express.Router();
 
@@ -24,19 +28,22 @@ routersVersionOne.use('/user/auth', userAuthRouter);
 routersVersionOne.use('/admin/auth', adminAuthRouter);
 
 // app
-routersVersionOne.use('/notification', notificationRouter)
-routersVersionOne.use('/bank-info', bankInfoRouter)
+routersVersionOne.use('/notification', notificationRouter);
+routersVersionOne.use('/bank-info', bankInfoRouter);
+routersVersionOne.use('/payment-history', paymentHistoryRouter);
+routersVersionOne.use('/invoice', invoiceRouter);
+routersVersionOne.use('/contact-us', contactUsRouter);
+routersVersionOne.use('/purchase-subscription', purchaseSubscriptionRouter);
 
 // settings
-routersVersionOne.use('/slider', sliderRouter)
-routersVersionOne.use('/about-us', aboutUsRouter)
-routersVersionOne.use('/privacy-policy', privacyPolicyRouter)
-routersVersionOne.use('/terms-condition', termsConditionRouter)
+routersVersionOne.use('/slider', sliderRouter);
+routersVersionOne.use('/about-us', aboutUsRouter);
+routersVersionOne.use('/privacy-policy', privacyPolicyRouter);
+routersVersionOne.use('/terms-condition', termsConditionRouter);
 
 // admin
-routersVersionOne.use('/speciality', specialityRouter)
-routersVersionOne.use('/subscription', subscriptionRouter)
-routersVersionOne.use('/messageCost', messageCostRouter)
-
+routersVersionOne.use('/speciality', specialityRouter);
+routersVersionOne.use('/subscription', subscriptionRouter);
+routersVersionOne.use('/messageCost', messageCostRouter);
 
 export default routersVersionOne;

@@ -98,7 +98,7 @@ const activeSpecificBankInfo = asyncHandler(async (req: Request, res: Response) 
     // Check if the bank info is already active
     const existingActiveBankInfo = await bankInfoService.retriveBankInfoWithTrueByBankId(id);
     if (existingActiveBankInfo) {
-      throw new CustomError.BadRequestError('The specified Bank Info is already active.');
+      throw new CustomError.BadRequestError('The specified Bank Info is already active!');
     }
 
     // Inactivate all bank info
