@@ -194,7 +194,7 @@ const updateSpecificUser = asyncHandler(async (req: Request, res: Response) => {
   }
 
   if (role === 'therapist') {
-    const therapistProfile = await therapistProfileServices.getTherapistProfileByUserId(id);
+    const therapistProfile = await therapistProfileServices.getTherapistProfileByUserId(id)
     if (files && files.curriculumVitae) {
       const curriculumVitaePath = await fileUploader(files as FileArray, `curriculum-vitae`, 'curriculumVitae');
       userData.curriculumVitae = curriculumVitaePath;
@@ -225,7 +225,7 @@ const updateSpecificUser = asyncHandler(async (req: Request, res: Response) => {
 
     updatedProfile = await therapistProfileServices.updateTherapistProfileByuserId(id, userData);
   }
-  // console.log(userData)
+// console.log(userData)
   const updatedUser = await userServices.updateSpecificUser(id, userData);
   // console.log(updatedUser, updatedProfile)
   if (!updatedUser?.isModified) {
@@ -282,6 +282,18 @@ const changeUserProfileImage = asyncHandler(async (req: Request, res: Response) 
   });
 });
 
+// retrive popular therapists
+const getPopularTherapists = asyncHandler(async (req: Request, res: Response) => {
+  const therapists = await therapistProfileServices.getPopularTherapists(Number(config.popular_doctor_document_count));
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    status: 'success',
+    message: 'Popular therapists retrive successfull',
+    data: therapists,
+  });
+});
+
 export default {
   createUser,
   getSpecificUser,
@@ -289,4 +301,5 @@ export default {
   deleteSpecificUser,
   updateSpecificUser,
   changeUserProfileImage,
+  getPopularTherapists,
 };

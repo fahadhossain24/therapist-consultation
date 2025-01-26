@@ -20,4 +20,7 @@ export default {
   // SMTP credentials
   gmail_app_user: process.env.GMAIL_APP_USER,
   gmail_app_password: process.env.GMAIL_APP_PASSWORD,
+
+    // popular doctor document count
+    popular_doctor_document_count: process.env.POPULAR_DOCTOR_DOCUMENT_COUNT
 };

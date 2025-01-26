@@ -26,7 +26,10 @@ const getAllInvoicesByUserId = async (userId: string, searchQuery: string, skip:
     query.invoiceId = searchQuery;
   }
 
-  return await Invoice.find(query).skip(skip).limit(limit);
+  return await Invoice.find(query).skip(skip).limit(limit).populate({
+    path: 'user.id',
+    select: 'firstName lastName',
+  });
 };
 
 export default {

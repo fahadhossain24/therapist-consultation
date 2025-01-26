@@ -15,6 +15,11 @@ class SubscriptionService {
     return await Subscription.find(query).skip(skip).limit(limit);
   }
 
+  public async getSpecificSubscription(id: string) {
+    const subscription = await Subscription.findById(id);
+    return subscription;
+  }
+
   public async updateSpecificSubscription(id: string, data: Partial<ISubscription>) {
     const updatedSubscription = await Subscription.findByIdAndUpdate(id, data, { new: true, runValidators: true });
     return updatedSubscription;

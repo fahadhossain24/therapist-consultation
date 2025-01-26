@@ -8,7 +8,10 @@ const createPaymentHistory = async (data: Partial<IPaymentHistory>) => {
 
 // service for get all payouts by user id (therapist)
 const getAllPaymentHistoryByUserId = async (userId: string) => {
-  return await PaymentHistory.find({ user: userId });
+  return await PaymentHistory.find({ user: userId }).populate({
+    path: 'user',
+    select: 'firstName lastName'
+  });
 };
 
 //service for delete all payouts
