@@ -3,6 +3,10 @@ import { ISlider } from './slider.interface';
 
 const sliderSchema = new mongoose.Schema<ISlider>(
   {
+    therapist: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'user',
+    },
     title: String,
     image: String
   },

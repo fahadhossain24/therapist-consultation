@@ -9,5 +9,4 @@ paymentHistoryRouter.get('/retrive/user/:userId', authentication('patient', 'the
 
 paymentHistoryRouter.delete('/delete/all', authentication('admin', 'super-admin'), paymentHistoryControllers.deleteAllPaymentHistories)
 
-
 export default paymentHistoryRouter

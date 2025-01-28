@@ -70,5 +70,11 @@ const therapistProfileSchema = new mongoose.Schema<ITherapistProfile>(
   },
 );
 
+therapistProfileSchema.index({
+  subSpecialty: 'text',
+  professionalSummary: 'text',
+  experience: 'text',
+})
+
 const TherapistProfile = mongoose.model<ITherapistProfile>('therapist', therapistProfileSchema);
 export default TherapistProfile;

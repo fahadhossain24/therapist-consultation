@@ -13,6 +13,7 @@ userRouter.patch('/update/:id', authentication('patient', 'therapist'), requestV
 userRouter.delete('/delete/:id', authentication('patient', 'therapist'), requestValidator(UserValidationZodSchema.getSpecificUserZodSchema), userControllers.deleteSpecificUser)
 userRouter.patch('/update/profile-picture/:id', authentication('patient', 'therapist'), requestValidator(UserValidationZodSchema.getSpecificUserZodSchema), userControllers.changeUserProfileImage)
 userRouter.get('/retrive/therapists/popular', authentication('patient', 'therapist'), userControllers.getPopularTherapists)
+userRouter.get('/retrive/therapists/active-and-premium', authentication('patient', 'therapist'), userControllers.getActiveAndPremiumTherapists)
 
 export default userRouter
 
