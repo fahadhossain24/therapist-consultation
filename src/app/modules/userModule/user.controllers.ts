@@ -12,8 +12,10 @@ import { FileArray } from 'express-fileupload';
 import asyncHandler from '../../../shared/asyncHandler';
 import patientProfileServices from '../profileModule/patientProfile/patientProfile.services';
 import therapistProfileServices from '../profileModule/therapistProfile/therapistProfile.services';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { slotsPerDayOfAvailities } from './user.utils';
+import walletUtils from '../walletModule/wallet.utils';
+import therapistProfessionalServices from '../professionalModule/therapistProfessional/therapistProfessional.services';
 
 // controller for create new user
 const createUser = asyncHandler(async (req: Request, res: Response) => {
@@ -114,6 +116,11 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
     sendMail(mailOptions);
   }
 
+  // create wallet for the user
+  await walletUtils.createOrUpdateSpecificWallet(user._id as unknown as string, {
+    user: { type: user.role, id: user._id as unknown as Types.ObjectId },
+  });
+
   sendResponse(res, {
     statusCode: StatusCodes.CREATED,
     status: 'success',
@@ -158,6 +165,8 @@ const deleteSpecificUser = asyncHandler(async (req: Request, res: Response) => {
   if (!isDelete) {
     throw new CustomError.BadRequestError('Failed to delete user!');
   }
+
+  // delete wallet of the user
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -308,6 +317,32 @@ const getActiveAndPremiumTherapists = asyncHandler(async (req: Request, res: Res
   });
 });
 
+// controller to retrive all therapists by speciality
+const getAllTherapistsBySpeciality = asyncHandler(async (req: Request, res: Response) => {
+  const { speciality } = req.query;
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 8;
+
+  const skip = (page - 1) * limit;
+  const therapists = await therapistProfessionalServices.getAllTherapistsBySpeciality(speciality as string, skip, limit);
+
+  const totalTherapists = therapists.length || 0;
+  const totalPages = Math.ceil(totalTherapists / limit);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    status: 'success',
+    message: 'Therapists retrive successfull',
+    meta: {
+      totalData: totalTherapists,
+      totalPage: totalPages,
+      currentPage: page,
+      limit: limit,
+    },
+    data: therapists,
+  });
+});
+
 export default {
   createUser,
   getSpecificUser,
@@ -317,4 +352,5 @@ export default {
   changeUserProfileImage,
   getPopularTherapists,
   getActiveAndPremiumTherapists,
+  getAllTherapistsBySpeciality,
 };

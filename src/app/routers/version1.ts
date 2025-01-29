@@ -16,6 +16,8 @@ import paymentHistoryRouter from '../modules/paymentHistoryModule/paymentHistory
 import invoiceRouter from '../modules/invoiceModule/invoice.routes';
 import contactUsRouter from '../modules/contactUsModule/contactUs.routes';
 import purchaseSubscriptionRouter from '../modules/purchaseSubscriptionModule/purchaseSubscription.routes';
+import walletRouter from '../modules/walletModule/wallet.routes';
+import appointmentRouter from '../modules/appointmentModule/appointment.routes';
 
 const routersVersionOne = express.Router();
 
@@ -34,6 +36,8 @@ routersVersionOne.use('/payment-history', paymentHistoryRouter);
 routersVersionOne.use('/invoice', invoiceRouter);
 routersVersionOne.use('/contact-us', contactUsRouter);
 routersVersionOne.use('/purchase-subscription', purchaseSubscriptionRouter);
+routersVersionOne.use('/wallet', walletRouter);
+routersVersionOne.use('/appointment', appointmentRouter);
 
 // settings
 routersVersionOne.use('/slider', sliderRouter);

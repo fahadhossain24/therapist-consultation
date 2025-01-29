@@ -1,6 +1,7 @@
 // bankInfo.model.ts
 import mongoose, { Schema } from 'mongoose';
 import { IBankInfo } from './bankInfo.interface';
+import { CURRENCY_ENUM } from '../../../enums/currency';
 
 const bankInfoSchema = new Schema<IBankInfo>({
     user: { type: Schema.Types.ObjectId, ref: 'user' },
@@ -13,7 +14,7 @@ const bankInfoSchema = new Schema<IBankInfo>({
     iban: { type: String},
     countryCode: { type: String },
     accountType: { type: String },
-    currency: { type: String, enum: ['USD'], default: 'USD'},
+    currency: { type: String, enum: CURRENCY_ENUM, default: CURRENCY_ENUM.USD },
     isActive: { type: Boolean, default: false },
     errorLogs: [{
         errorCode: { type: String},

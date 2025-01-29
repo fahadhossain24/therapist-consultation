@@ -1,10 +1,11 @@
 import mongoose from 'mongoose';
 import { IMessageCost } from './messageCost.interface';
+import { CURRENCY_ENUM } from '../../../enums/currency';
 
 const messageCostSchema = new mongoose.Schema<IMessageCost>(
   {
     costPerMessage: {
-      currency: { type: String, enum: ['USD'], default: 'USD' },
+      currency: { type: String, enum: CURRENCY_ENUM, default: CURRENCY_ENUM.USD },
       amount: { type: Number, required: true },
     },
     maxWords: { type: Number, required: true },

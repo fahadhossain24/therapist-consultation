@@ -12,6 +12,14 @@ const getInvoiceById = async (invoiceId: string) => {
     path: 'user.id',
     select: 'firstName lastName email phone',
   })
+  .populate({
+    path: 'appointment',
+    select: 'date slot feeInfo.bookedFee feeInfo.patientTransactionId feeInfo.therapistTransactionId',
+    populate: {
+      path: 'therapist',
+      select: 'firstName lastName'
+    }
+  });
 };
 
 // service for get all invoices by userId
@@ -26,10 +34,21 @@ const getAllInvoicesByUserId = async (userId: string, searchQuery: string, skip:
     query.invoiceId = searchQuery;
   }
 
-  return await Invoice.find(query).skip(skip).limit(limit).populate({
-    path: 'user.id',
-    select: 'firstName lastName',
-  });
+  return await Invoice.find(query)
+    .skip(skip)
+    .limit(limit)
+    .populate({
+      path: 'user.id',
+      select: 'firstName lastName email phone',
+    })
+    .populate({
+      path: 'appointment',
+      select: 'date slot feeInfo.bookedFee feeInfo.patientTransactionId feeInfo.therapistTransactionId',
+      populate: {
+        path: 'therapist',
+        select: 'firstName lastName'
+      }
+    });
 };
 
 export default {
