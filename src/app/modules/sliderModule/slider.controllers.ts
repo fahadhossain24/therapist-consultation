@@ -10,8 +10,10 @@ import sendResponse from '../../../shared/sendResponse';
 const createSlider = async (req: Request, res: Response) => {
   const sliderData = req.body;
 
-  const sliderImagePath = await fileUploader(req.files as FileArray, `slider-image`, 'image');
-  sliderData.image = sliderImagePath;
+  if (req.files) {
+    const sliderImagePath = await fileUploader(req.files as FileArray, `slider-image`, 'image');
+    sliderData.image = sliderImagePath;
+  }
 
   const slider = await Slider.create(sliderData);
   if (!slider) {

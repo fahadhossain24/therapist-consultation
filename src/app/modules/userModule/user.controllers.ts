@@ -16,6 +16,7 @@ import mongoose, { Types } from 'mongoose';
 import { slotsPerDayOfAvailities } from './user.utils';
 import walletUtils from '../walletModule/wallet.utils';
 import therapistProfessionalServices from '../professionalModule/therapistProfessional/therapistProfessional.services';
+import therapistProfessionalUtils from '../professionalModule/therapistProfessional/therapistProfessional.utils';
 
 // controller for create new user
 const createUser = asyncHandler(async (req: Request, res: Response) => {
@@ -92,6 +93,10 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
   const user = await userServices.createUser(userData);
   if (!user) {
     throw new CustomError.BadRequestError('Failed to create new user!');
+  }
+
+  if(userData.role === 'therapist') {
+    await therapistProfessionalUtils.createOrUpdateTherapistProfessional(user._id as unknown as string, { therapist: user._id as unknown as Types.ObjectId });
   }
 
   if (profile) {
@@ -193,7 +198,7 @@ const updateSpecificUser = asyncHandler(async (req: Request, res: Response) => {
   // }
   let updatedProfile;
 
-  if (role === 'patient') {
+  if (userData.role === 'patient') {
     if (files && files.image) {
       const userImagePath = await fileUploader(files as FileArray, `user-image`, 'image');
       userData.image = userImagePath;
@@ -202,7 +207,7 @@ const updateSpecificUser = asyncHandler(async (req: Request, res: Response) => {
     updatedProfile = await patientProfileServices.updatePatientProfileByuserId(id, userData);
   }
 
-  if (role === 'therapist') {
+  if (userData.role === 'therapist') {
     const therapistProfile = await therapistProfileServices.getTherapistProfileByUserId(id);
     if (files && files.curriculumVitae) {
       const curriculumVitaePath = await fileUploader(files as FileArray, `curriculum-vitae`, 'curriculumVitae');
@@ -234,10 +239,11 @@ const updateSpecificUser = asyncHandler(async (req: Request, res: Response) => {
 
     updatedProfile = await therapistProfileServices.updateTherapistProfileByuserId(id, userData);
   }
-  // console.log(userData)
+
   const updatedUser = await userServices.updateSpecificUser(id, userData);
+  console.log(updatedUser)
   // console.log(updatedUser, updatedProfile)
-  if (!updatedUser?.isModified) {
+  if (!updatedUser?.modifiedCount) {
     throw new CustomError.BadRequestError('Failed to update user!');
   }
 

@@ -44,13 +44,18 @@ const appointmentSchema = new mongoose.Schema<IAppointment>(
     isAvailableInWallet: Boolean,
     status: {
       type: String,
-      enum: ['pending', 'approved', 'completed', 'cancelled', 'missed', 'cancelled-requested', 'cancelled-approved'],
+      enum: ['pending', 'approved', 'completed', 'cancelled', 'missed', 'cancelled-requested', 'cancelled-approved', 'rescheduled'],
       default: 'pending',
     },
     cancelReason: {
       type: String,
       default: null,
     },
+    rescheduleReason: {
+      type: String,
+      default: null,
+    },
+    appointmentId: String,
   },
   {
     timestamps: true,

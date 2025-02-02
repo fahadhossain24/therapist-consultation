@@ -7,7 +7,7 @@ const therapistProfileSchema = new mongoose.Schema<ITherapistProfile>(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'user',
     },
-    specialty: {
+    speciality: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'speciality',
       required: true,

@@ -41,7 +41,8 @@ const getSpecificUserByEmail = async (email: string): Promise<IUser> => {
 
 // service for update specific user
 const updateSpecificUser = async (id: string, data: Partial<IUser>) => {
-  return await User.findOneAndUpdate({ _id: id }, data);
+  console.log(data)
+  return await User.updateOne({ _id: id }, data);
 };
 
 // service for delete specific user

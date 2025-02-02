@@ -35,4 +35,6 @@ export interface IAppointment extends Document {
   isAvailableInWallet: boolean;
   status: string;
   cancelReason: string;
+  appointmentId: string;
+  rescheduleReason: string;
 }

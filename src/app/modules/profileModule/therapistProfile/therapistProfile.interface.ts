@@ -2,7 +2,7 @@ import { Document, Types } from 'mongoose';
 
 interface ITherapistProfile extends Document {
   user: Types.ObjectId;
-  specialty: Types.ObjectId;
+  speciality: Types.ObjectId;
   subSpecialty: string;
   professionalSummary: string;
   image?: string;

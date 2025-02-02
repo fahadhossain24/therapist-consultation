@@ -79,9 +79,25 @@ const deleteSpecificSubscription = asyncHandler(async (req: Request, res: Respon
   });
 });
 
+// controller for get specific subscription by id
+const getSpecificSubscriptionById = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const subscription = await subscriptionService.getSpecificSubscription(id);
+  if (!subscription) {
+    throw new CustomError.NotFoundError('Subscription not found!');
+  }
+  sendResponse(res, {
+    statusCode: 200,
+    status: 'success',
+    message: 'Subscription retrieved successfully',
+    data: subscription,
+  });
+});
+
 export default {
   createSubscription,
   getSubscriptions,
   updateSpecificSubscription,
   deleteSpecificSubscription,
+  getSpecificSubscriptionById
 };

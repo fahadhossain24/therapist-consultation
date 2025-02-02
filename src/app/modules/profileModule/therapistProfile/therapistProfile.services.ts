@@ -34,6 +34,10 @@ const getPopularTherapists = async (documentCount: number) => {
       populate: {
         path: 'profile',
         select: '',
+        populate: {
+          path: 'speciality',
+          select: 'name image'
+        }
       },
     });
 };
@@ -54,6 +58,7 @@ const getPopularTherapists = async (documentCount: number) => {
 //     },
 //   });
 // };
+
 const getActiveAndPremiumTherapists = async (searchQuery: string) => {
   const matchCondition: any = {
     status: 'active', // Only include active therapists

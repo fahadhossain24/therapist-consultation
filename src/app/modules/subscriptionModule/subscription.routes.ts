@@ -27,4 +27,11 @@ subscriptionRouter.delete(
   subscriptionController.deleteSpecificSubscription,
 );
 
+subscriptionRouter.get(
+  '/retrive/:id',
+  authentication('admin', 'super-admin'),
+  requestValidator(SubscriptionValidationZodSchema.getSpecificSubscriptionZodSchema),
+  subscriptionController.getSpecificSubscriptionById,
+);
+
 export default subscriptionRouter;
