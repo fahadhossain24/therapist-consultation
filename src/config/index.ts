@@ -21,6 +21,10 @@ export default {
   gmail_app_user: process.env.GMAIL_APP_USER,
   gmail_app_password: process.env.GMAIL_APP_PASSWORD,
 
+  // zego cloud
+  zego_app_id: process.env.ZEGO_APP_ID,
+  zego_server_secret: process.env.ZEGO_SERVER_SECRET,
+
     // popular doctor document count
     popular_doctor_document_count: process.env.POPULAR_DOCTOR_DOCUMENT_COUNT
 };

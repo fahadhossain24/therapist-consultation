@@ -42,7 +42,25 @@ const deleteAllPaymentHistories = asyncHandler(async (req: Request, res: Respons
   });
 });
 
+// controller for get all payment histories
+const getAllPaymentHistories = asyncHandler(async (req: Request, res: Response) => {
+  const { searchQuery } = req.body;
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 8;
+
+  const skip = (page - 1) * limit;
+  const paymentHistories = await paymentHistoryServices.getAllPaymentHistories(searchQuery, skip, limit);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    status: 'success',
+    message: 'Payment Histories retrive successfull',
+    data: paymentHistories,
+  });
+});
+
 export default {
   getAllPaymentHistoryByUserId,
   deleteAllPaymentHistories,
+  getAllPaymentHistories,
 };

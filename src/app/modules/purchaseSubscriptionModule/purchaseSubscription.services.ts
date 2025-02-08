@@ -22,8 +22,39 @@ const inactiveSubscriptionByUserIdAndSubscriptionId = async (userId: string, sub
   );
 };
 
+// service for get total earnings from all purchase subscriptions
+const getTotalEarnings = async () => {
+  const result = await PurchaseSubscription.aggregate([
+    {
+      $lookup: {
+        from: 'subscriptions', // Matches the `Subscription` collection
+        localField: 'subscription',
+        foreignField: '_id',
+        as: 'subscriptionData',
+      },
+    },
+    { $unwind: '$subscriptionData' }, // Flatten the array
+    {
+      $group: {
+        _id: '$subscriptionData.price.currency', // Group by currency
+        totalEarnings: { $sum: '$subscriptionData.price.amount' },
+      },
+    },
+  ]);
+
+  if (!result.length) {
+    return { totalEarnings: 0, currency: 'USD' };
+  }
+
+  return result.map((entry) => ({
+    currency: entry._id,
+    totalEarnings: entry.totalEarnings,
+  }));
+};
+
 export default {
   createPurchaseSubscription,
   getPurchasedAndActiveSubscriptionByUserId,
   inactiveSubscriptionByUserIdAndSubscriptionId,
+  getTotalEarnings
 };

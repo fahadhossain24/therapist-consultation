@@ -20,8 +20,13 @@ const getSpecificUser = async (id: string): Promise<IUser> => {
 };
 
 // service for get specific user
-const getAllUser = async (): Promise<IUser[]> => {
-  return await User.find()
+const getAllUser = async (role: string): Promise<IUser[]> => {
+  const query: any = {};
+  if (role) {
+    query.role = role;
+  }
+
+  return await User.find(query)
     .populate({
       path: 'profile',
       select: '',

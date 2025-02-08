@@ -18,6 +18,10 @@ import contactUsRouter from '../modules/contactUsModule/contactUs.routes';
 import purchaseSubscriptionRouter from '../modules/purchaseSubscriptionModule/purchaseSubscription.routes';
 import walletRouter from '../modules/walletModule/wallet.routes';
 import appointmentRouter from '../modules/appointmentModule/appointment.routes';
+import conversationRouter from '../modules/conversationModule/conversations.routes';
+import messageRouter from '../modules/messageModule/message.routes';
+import attachmentRouter from '../modules/attachmentModule/attachment.routes';
+import dashboardMatricRouter from '../modules/dashboardMatricModule/dashboardMatric.routes';
 
 const routersVersionOne = express.Router();
 
@@ -38,6 +42,10 @@ routersVersionOne.use('/contact-us', contactUsRouter);
 routersVersionOne.use('/purchase-subscription', purchaseSubscriptionRouter);
 routersVersionOne.use('/wallet', walletRouter);
 routersVersionOne.use('/appointment', appointmentRouter);
+routersVersionOne.use('/conversation', conversationRouter);
+routersVersionOne.use('/message', messageRouter);
+routersVersionOne.use('/attachment', attachmentRouter);
+routersVersionOne.use('/dashboard', dashboardMatricRouter);
 
 // settings
 routersVersionOne.use('/slider', sliderRouter);

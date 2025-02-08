@@ -5,9 +5,10 @@ import Slider from './slider.model';
 import CustomError from '../../errors';
 import { StatusCodes } from 'http-status-codes';
 import sendResponse from '../../../shared/sendResponse';
+import asyncHandler from '../../../shared/asyncHandler';
 
 // controller for create new slider
-const createSlider = async (req: Request, res: Response) => {
+const createSlider = asyncHandler(async (req: Request, res: Response) => {
   const sliderData = req.body;
 
   if (req.files) {
@@ -24,10 +25,11 @@ const createSlider = async (req: Request, res: Response) => {
     statusCode: StatusCodes.CREATED,
     status: 'success',
     message: 'slider image create successfull',
+    data: slider
   });
-};
+});
 
-const getAllSlider = async (req: Request, res: Response) => {
+const getAllSlider = asyncHandler(async (req: Request, res: Response) => {
   const sliders = await Slider.find();
 
   sendResponse(res, {
@@ -36,9 +38,9 @@ const getAllSlider = async (req: Request, res: Response) => {
     message: 'slider images retrive successfull',
     data: sliders,
   });
-};
+});
 
-const getSpecificSlider = async (req: Request, res: Response) => {
+const getSpecificSlider = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   if (!id) {
     throw new CustomError.BadRequestError('Missing id in request params!');
@@ -55,9 +57,9 @@ const getSpecificSlider = async (req: Request, res: Response) => {
     message: 'slider images retrive successfull',
     data: slider,
   });
-};
+});
 
-const updateSpecificSlider = async (req: Request, res: Response) => {
+const updateSpecificSlider = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const files = req.files;
   if (!id) {
@@ -82,9 +84,9 @@ const updateSpecificSlider = async (req: Request, res: Response) => {
     status: 'success',
     message: 'slider update successfull',
   });
-};
+});
 
-const deleteSpecificSlider = async (req: Request, res: Response) => {
+const deleteSpecificSlider = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   if (!id) {
     throw new CustomError.BadRequestError('Missing id in request params!');
@@ -101,7 +103,7 @@ const deleteSpecificSlider = async (req: Request, res: Response) => {
     status: 'success',
     message: 'slider delete successfull',
   });
-};
+});
 
 export default {
   createSlider,

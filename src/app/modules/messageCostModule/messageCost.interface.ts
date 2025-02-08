@@ -5,5 +5,5 @@ export interface IMessageCost extends Document {
         currency: string;
         amount: number
     };
-    maxWords: number;
+    maxCharacters: number;
 }

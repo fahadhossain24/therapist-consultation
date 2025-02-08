@@ -15,6 +15,10 @@ import notificationUtils from '../notificationModule/notification.utils';
 import CustomError from '../../errors';
 import Appointment from './appointment.model';
 import { generateNextAppointmentId } from './appointment.utils';
+import conversationUtils from '../conversationModule/conversation.utils';
+import { IConversation } from '../conversationModule/conversation.interface';
+import SocketManager from '../../socket/manager.socket';
+import appointmentDueServices from '../appointmentDueModule/appointmentDue.services';
 
 // controller for create new appointment
 const createAppointment = asyncHandler(async (req: Request, res: Response) => {
@@ -382,6 +386,7 @@ const cancelAppointmentByPatientAfterApproved = asyncHandler(async (req: Request
 // controller to accept appointment by therapist from pending
 const acceptAppointmentByTherapistFromPending = asyncHandler(async (req: Request, res: Response) => {
   const { appointmentId } = req.params;
+  const socketManager = SocketManager.getInstance();
 
   const appointment = await appointmentService.getSpecificAppointment(appointmentId);
   if (!appointment) {
@@ -409,6 +414,27 @@ const acceptAppointmentByTherapistFromPending = asyncHandler(async (req: Request
       },
     },
   });
+
+  // create new conversation for the appointment by appointmentId
+  const conversationPayload: Partial<IConversation> = {
+    patient: {
+      name: patienttUser.firstName + ' ' + patienttUser.lastName,
+      patientUserId: patienttUser._id as unknown as string,
+    },
+    therapist: {
+      name: therapistUser.firstName + ' ' + therapistUser.lastName,
+      therapistUserId: therapistUser._id as unknown as string,
+    },
+    appointment: new mongoose.Types.ObjectId(appointmentId),
+  };
+  const conversation = await conversationUtils.createConversation(conversationPayload);
+
+  if (conversation) {
+    // join socket room using appointmentId
+    socketManager.joinUserToRoom(conversation);
+  } else {
+    console.log('conversation not created and failed to join this conversation room!');
+  }
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -464,7 +490,7 @@ const rescheduleAppointmentByTherapistAfterMissed = asyncHandler(async (req: Req
   const { appointmentId } = req.params;
   const { date, slot, reason } = req.body;
 
-  if(!date || !slot || !reason){
+  if (!date || !slot || !reason) {
     throw new CustomError.BadRequestError('date, slot and reason are required for rescheduling!');
   }
 
@@ -525,6 +551,100 @@ const rescheduleAppointmentByTherapistAfterMissed = asyncHandler(async (req: Req
   });
 });
 
+// controller to retrive specific appointment by appointment id
+const getSpecificAppointment = asyncHandler(async (req: Request, res: Response) => {
+  const { appointmentId } = req.params;
+  const appointment = await appointmentService.getSpecificAppointment(appointmentId);
+  if (!appointment) {
+    throw new CustomError.NotFoundError('Appointment not found!');
+  }
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    status: 'success',
+    message: 'Appointment retrieved successfully',
+    data: appointment,
+  });
+});
+
+// controller to get all appointments
+const getAppointments = asyncHandler(async (req: Request, res: Response) => {
+  const { searchQuery } = req.query;
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 8;
+
+  const skip = (page - 1) * limit;
+
+  const appointments = await appointmentService.getAppointments(searchQuery as string, skip, limit);
+  const totalAppointments = appointments?.length || 0;
+  const totalPages = Math.ceil(totalAppointments / limit);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    status: 'success',
+    message: 'Appointments retrieved successfully',
+    meta: {
+      totalData: totalAppointments,
+      totalPage: totalPages,
+      currentPage: page,
+      limit: limit,
+    },
+    data: appointments,
+  });
+});
+
+// controller for pay patient appointment due amount
+const payPatientAppointmentDueAmount = asyncHandler(async (req: Request, res: Response) => {
+  const { appointmentId } = req.params;
+  const paymentData = req.body;
+
+  const appointment = await appointmentService.getSpecificAppointment(appointmentId);
+  if (!appointment) {
+    throw new CustomError.NotFoundError('Appointment not found!');
+  }
+  
+  const due = await appointmentDueServices.getSpecificDueByAppointmentId(appointmentId);
+  if (!due) {
+    throw new CustomError.NotFoundError('Due not found!');
+  }
+
+  const paymentPayload = {
+    user: new mongoose.Types.ObjectId(appointment.patient),
+    purpose: 'Pay appointment due fee',
+    transactionId: paymentData.transactionId,
+    currency: paymentData.currency,
+    amount: paymentData.amount,
+    paymentType: 'debit',
+  }
+
+  const payment = await paymentHistoryUtils.createPaymentHistory(paymentPayload);
+  if(!payment){
+    throw new CustomError.BadRequestError('Failed to make payment!');
+  }
+
+  // make notification for the payment
+  await notificationUtils.createNotification({
+    consumer: new mongoose.Types.ObjectId(appointment.patient),
+    content: {
+      title: 'Payment Successfull',
+      message: `Your payment for appointment due is successfull!`,
+      source: {
+        type: 'paymentHistory',
+        id: payment._id as unknown as Types.ObjectId,
+      },
+    },
+  });
+
+  // delete due document for the appointment from database
+  await appointmentDueServices.deleteSpecificDueByAppointmentId(appointmentId);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    status: 'success',
+    message: 'Payment successfull',
+  });
+});
+
 export default {
   createAppointment,
   getAppointmentsByUserAndStatus,
@@ -534,4 +654,6 @@ export default {
   acceptAppointmentByTherapistFromPending,
   approveAppointmentCancelledRequest,
   rescheduleAppointmentByTherapistAfterMissed,
+  getSpecificAppointment,
+  getAppointments,
 };

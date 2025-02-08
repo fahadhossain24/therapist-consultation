@@ -29,6 +29,10 @@ export interface IAppointment extends Document {
       amount: number;
       currency: string;
     };
+    dueFee: {
+      amount: number;
+      currency: string;
+    };
     therapistTransactionId: string;
     patientTransactionId: string;
   };

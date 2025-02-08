@@ -152,7 +152,8 @@ const getSpecificUser = asyncHandler(async (req: Request, res: Response) => {
 
 // service for get specific user by id
 const getAllUser = asyncHandler(async (req: Request, res: Response) => {
-  const users = await userServices.getAllUser();
+  const {role} = req.query
+  const users = await userServices.getAllUser(role as string);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,

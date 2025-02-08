@@ -6,7 +6,7 @@ const createMessageCostZodSchema = z.object({
       currency: z.string().min(1, 'Currency is required'),
       amount: z.number().positive('Amount must be a positive number'),
     }),
-    maxWords: z.number().positive('Max words must be a positive number'),
+    maxCharacters: z.number().positive('Max characters must be a positive number'),
   }),
 });
 

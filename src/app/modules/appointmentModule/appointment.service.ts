@@ -1,3 +1,4 @@
+import { populate } from 'dotenv';
 import { IAppointment } from './appointment.interface';
 import Appointment from './appointment.model';
 
@@ -23,14 +24,42 @@ const getAppointmentsByUserAndStatus = async (userType: string, userId: string, 
     return Appointment.find({
       therapist: userId,
       status,
-    }).skip(skip).limit(limit);
+    })
+      .skip(skip)
+      .limit(limit)
+      .populate({
+        path: 'therapist',
+        select: '-verificationCode -password -email -isVerified -fcmToken -isSocial -createdAt -updatedAt -isDeleted -__v',
+        populate: {
+          path: 'profile',
+          select: 'speciality image',
+          populate: {
+            path: 'speciality',
+            select: 'name',
+          },
+        },
+      });
   }
 
   if (userType === 'patient') {
     return Appointment.find({
       patient: userId,
       status,
-    }).skip(skip).limit(limit);
+    })
+      .skip(skip)
+      .limit(limit)
+      .populate({
+        path: 'therapist',
+        select: '-verificationCode -password -email -isVerified -fcmToken -isSocial -createdAt -updatedAt -__v',
+        populate: {
+          path: 'profile',
+          select: 'speciality image',
+          populate: {
+            path: 'speciality',
+            select: 'name',
+          },
+        },
+      });
   }
 };
 
@@ -44,7 +73,41 @@ const updateSpecificAppointmentById = async (appointmentId: string, data: Partia
   return await Appointment.findOneAndUpdate({ _id: appointmentId }, data, { new: true });
 };
 
+// service to retrive specific appointment by appointment id
+const retriveSpecificAppointmentByAppointmentId = async (appointmentId: string) => {
+  return await Appointment.findOne({ _id: appointmentId });
+};
 
+// service for get all appointments with search and pagination
+const getAppointments = async (searchQuery: string, skip: number, limit: number) => {
+  const query: any = {};
+  if (searchQuery) {
+    query.$text = { $search: searchQuery };
+  }
+  return await Appointment.find(query).skip(skip).limit(limit).select('-feeInfo.holdFee').populate({
+    path: 'patient',
+    select: '-verification -password -email -isVerified -fcmToken -isSocial -createdAt -updatedAt -isDeleted -__v',
+    populate: {
+      path: 'profile',
+      select: '',
+      // populate: {
+      //   path: 'speciality',
+      //   select: 'name',
+      // },
+    },
+  }).populate({
+    path: 'therapist',
+    select: '-verification -password -email -isVerified -fcmToken -isSocial -createdAt -updatedAt -isDeleted -__v',
+    populate: {
+      path: 'profile',
+      select: '',
+      populate: {
+        path: 'speciality',
+        select: 'name',
+      },
+    },
+  });
+};
 
 export default {
   createAppointment,
@@ -52,4 +115,6 @@ export default {
   getAppointmentsByUserAndStatus,
   getSpecificAppointment,
   updateSpecificAppointmentById,
+  retriveSpecificAppointmentByAppointmentId,
+  getAppointments,
 };

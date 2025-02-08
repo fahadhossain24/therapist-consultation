@@ -20,4 +20,8 @@ appointmentRouter.patch('/approve-cancelled-request/:appointmentId', authorizati
 
 appointmentRouter.patch('/reschedule/:appointmentId', authorization('therapist', 'patient'), appointmentControllers.rescheduleAppointmentByTherapistAfterMissed);
 
+appointmentRouter.get('/retrive/specific/:appointmentId',  appointmentControllers.getSpecificAppointment);
+
+appointmentRouter.get('/retrive/all/sss',  appointmentControllers.getAppointments);
+
 export default appointmentRouter;

@@ -38,6 +38,10 @@ const appointmentSchema = new mongoose.Schema<IAppointment>(
         amount: { type: Number, default: 0 },
         currency: { type: String, enum: CURRENCY_ENUM, default: CURRENCY_ENUM.USD },
       },
+      dueFee: {
+        amount: { type: Number, default: 0 },
+        currency: { type: String, enum: CURRENCY_ENUM, default: CURRENCY_ENUM.USD },
+      },
       therapistTransactionId: String, // it come when payout to doctor, when appointment is completed
       patientTransactionId: String, // it is patient transaction id when patient payment for the apppointment
     },
@@ -61,6 +65,8 @@ const appointmentSchema = new mongoose.Schema<IAppointment>(
     timestamps: true,
   },
 );
+
+appointmentSchema.index({ appointmentId: 'text' });
 
 const Appointment = mongoose.model<IAppointment>('appointment', appointmentSchema);
 export default Appointment;

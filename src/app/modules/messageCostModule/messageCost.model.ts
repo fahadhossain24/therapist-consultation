@@ -8,7 +8,7 @@ const messageCostSchema = new mongoose.Schema<IMessageCost>(
       currency: { type: String, enum: CURRENCY_ENUM, default: CURRENCY_ENUM.USD },
       amount: { type: Number, required: true },
     },
-    maxWords: { type: Number, required: true },
+    maxCharacters: { type: Number, required: true },
   },
   {
     timestamps: true,
