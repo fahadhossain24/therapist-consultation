@@ -234,9 +234,11 @@ const createMessage = asyncHandler(async (req: Request, res: Response) => {
     conversation.lastMessage.content = null!;
   } else {
     conversation.lastMessage.content = 'Sent you a attachment' as string;
+    conversation.lastMessage.id = null!
   }
 
   await conversation.save();
+  console.log(conversation)
 
   if (messageData.type === 'attachment') {
     const attachmentPayload = {

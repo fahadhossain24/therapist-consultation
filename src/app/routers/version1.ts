@@ -22,6 +22,7 @@ import conversationRouter from '../modules/conversationModule/conversations.rout
 import messageRouter from '../modules/messageModule/message.routes';
 import attachmentRouter from '../modules/attachmentModule/attachment.routes';
 import dashboardMatricRouter from '../modules/dashboardMatricModule/dashboardMatric.routes';
+import feedbackRouter from '../modules/feedbackModule/feedback.routes';
 
 const routersVersionOne = express.Router();
 
@@ -46,6 +47,7 @@ routersVersionOne.use('/conversation', conversationRouter);
 routersVersionOne.use('/message', messageRouter);
 routersVersionOne.use('/attachment', attachmentRouter);
 routersVersionOne.use('/dashboard', dashboardMatricRouter);
+routersVersionOne.use('/feedback', feedbackRouter);
 
 // settings
 routersVersionOne.use('/slider', sliderRouter);

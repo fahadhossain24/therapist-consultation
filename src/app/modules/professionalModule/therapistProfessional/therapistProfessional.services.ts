@@ -25,6 +25,10 @@ const getAllTherapistsBySpeciality = async (speciality: string, skip: number, li
     populate: {
       path: 'profile',
       select: '',
+      populate: {
+        path: 'speciality',
+        select: 'name image'
+      }
     },
   });
 };
