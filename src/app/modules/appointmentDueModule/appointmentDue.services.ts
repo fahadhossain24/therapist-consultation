@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { IAppointmentDue } from './appointmentDue.interface';
 import AppointmentDue from './appointmentDue.model';
 
@@ -7,17 +8,26 @@ const createAppointmentDue = async (data: Partial<IAppointmentDue>) => {
 };
 
 // service for get specific due by appointment id
-const getSpecificDueByAppointmentId = async (appointmentId: string) => {
-  return await AppointmentDue.findOne({ appointment: appointmentId });
+const getSpecificDueByAppointmentId = async (appointmentId: string, session?: mongoose.ClientSession) => {
+  const query = AppointmentDue.findOne({ appointment: appointmentId });
+  if (session) query.session(session); // Apply session if provided
+  return query.exec();
 };
 
 // service for delete specific due by appointment id
-const deleteSpecificDueByAppointmentId = async (appointmentId: string) => {
-  return await AppointmentDue.findOneAndDelete({ appointment: appointmentId });
+const deleteSpecificDueByAppointmentId = async (appointmentId: string, session?: mongoose.ClientSession) => {
+  const query = AppointmentDue.findOneAndDelete({ appointment: appointmentId });
+  if (session) query.session(session); // Apply session if provided
+  return query.exec();
 };
 
+// service for update specific due by appointment id
+const updateSpecificDueByAppointmentId = async (appointmentId: string, data: Partial<IAppointmentDue>) => {
+  return await AppointmentDue.findOneAndUpdate({ appointment: appointmentId }, data, { new: true });
+};
 export default {
   createAppointmentDue,
   getSpecificDueByAppointmentId,
-  deleteSpecificDueByAppointmentId
+  deleteSpecificDueByAppointmentId,
+  updateSpecificDueByAppointmentId,
 };

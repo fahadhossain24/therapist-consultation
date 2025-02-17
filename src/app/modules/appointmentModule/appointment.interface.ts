@@ -21,6 +21,10 @@ export interface IAppointment extends Document {
   // },
   feeInfo: {
     feeStatus: string;
+    mainFee: {
+      amount: number;
+      currency: string;
+    };
     bookedFee: {
       amount: number;
       currency: string;

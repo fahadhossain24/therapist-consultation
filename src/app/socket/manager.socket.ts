@@ -161,7 +161,7 @@ class SocketManager {
   public handleStartCall(data: { conversationId: string; callerId: string; calleeId: string, callLogId: string }): void {
     const { conversationId, callerId, calleeId, callLogId } = data;
     const roomId = conversationId.toString();
-
+console.log(calleeId, roomId)
     if (this.connectedUsers[calleeId]) {
       this.io.to(this.connectedUsers[calleeId]).emit('incomingCall', { roomId, callerId, callLogId });
       console.log(`Call started by ${callerId} for ${calleeId}`);

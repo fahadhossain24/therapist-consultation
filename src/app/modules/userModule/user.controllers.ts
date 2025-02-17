@@ -73,6 +73,9 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
 
     const chargePerHour = JSON.parse(userData.chargePerHour);
     const availabilities = JSON.parse(userData.availabilities);
+    if (!Array.isArray(availabilities)) {
+      throw new CustomError.BadRequestError('availabilities must be an array');
+    }
 
     availabilities.forEach((day: any) => {
       if (!day.isClosed) {

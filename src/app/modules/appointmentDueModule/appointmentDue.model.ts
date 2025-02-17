@@ -12,6 +12,8 @@ const appointmentDueSchema = new mongoose.Schema<IAppointmentDue>({
     amount: { type: Number, default: 0 },
     currency: { type: String, enum: CURRENCY_ENUM, default: CURRENCY_ENUM.USD },
   },
+}, {
+    timestamps: true,
 });
 
 const AppointmentDue = mongoose.model<IAppointmentDue>('appointmentDue', appointmentDueSchema);

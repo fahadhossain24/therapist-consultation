@@ -8,6 +8,8 @@ appointmentRouter.post('/create', authorization('therapist', 'patient'), appoint
 
 appointmentRouter.get('/retrive/:userId', authorization('therapist', 'patient'), appointmentControllers.getAppointmentsByUserAndStatus);
 
+appointmentRouter.get('/retrive/todays/approved/:therapistId', authorization('therapist', 'patient'), appointmentControllers.getTodayApprovedAppointmentsByTherapist);
+
 appointmentRouter.get('/retrive/slots/by-therapist/:therapistId', authorization('therapist', 'patient'), appointmentControllers.getAvailableSlotsByDateAndTherapist);
 
 appointmentRouter.delete('/cancel/:appointmentId', authorization('patient', 'therapist'), appointmentControllers.cancelAppointmentByPatientBeforeApproved);
@@ -23,5 +25,9 @@ appointmentRouter.patch('/reschedule/:appointmentId', authorization('therapist',
 appointmentRouter.get('/retrive/specific/:appointmentId',  appointmentControllers.getSpecificAppointment);
 
 appointmentRouter.get('/retrive/all/sss',  appointmentControllers.getAppointments);
+
+appointmentRouter.post('/pay-appointment-due-amount/:appointmentId', authorization('therapist', 'patient'), appointmentControllers.payPatientAppointmentDueAmount);
+
+appointmentRouter.patch('/mark-appointment-as-completed', authorization('therapist', 'patient'), appointmentControllers.markAppointmentAsCompleted);
 
 export default appointmentRouter;

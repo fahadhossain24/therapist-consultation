@@ -19,10 +19,16 @@ import conversationUtils from '../conversationModule/conversation.utils';
 import { IConversation } from '../conversationModule/conversation.interface';
 import SocketManager from '../../socket/manager.socket';
 import appointmentDueServices from '../appointmentDueModule/appointmentDue.services';
+import Big from 'big.js';
+import { CURRENCY_ENUM } from '../../../enums/currency';
 
 // controller for create new appointment
 const createAppointment = asyncHandler(async (req: Request, res: Response) => {
   const appointmentData = req.body;
+  appointmentData.feeInfo.mainFee = {
+    amount: appointmentData.feeInfo.bookedFee.amount,
+    currency: appointmentData.feeInfo.bookedFee.currency,
+  };
 
   const lastAppointment = await Appointment.findOne().sort('-createdAt');
   const appointmentId = generateNextAppointmentId(lastAppointment?.appointmentId as string);
@@ -229,6 +235,19 @@ const getAppointmentsByUserAndStatus = asyncHandler(async (req: Request, res: Re
       currentPage: page,
       limit: limit,
     },
+    data: appointments,
+  });
+});
+
+// controller to get today approved appointments by therapist
+const getTodayApprovedAppointmentsByTherapist = asyncHandler(async (req: Request, res: Response) => {
+  const { therapistId } = req.params;
+  const appointments = await appointmentService.getTodayApprovedAppointmentsByTherapist(therapistId);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    status: 'success',
+    message: 'Appointments retrieved successfully',
     data: appointments,
   });
 });
@@ -598,56 +617,193 @@ const payPatientAppointmentDueAmount = asyncHandler(async (req: Request, res: Re
   const { appointmentId } = req.params;
   const paymentData = req.body;
 
-  const appointment = await appointmentService.getSpecificAppointment(appointmentId);
+  // const session = await mongoose.startSession();
+  // session.startTransaction();
+
+  try {
+    // Pass session explicitly into service function
+    const appointment = await appointmentService.getSpecificAppointment(appointmentId);
+    if (!appointment) {
+      throw new CustomError.NotFoundError('Appointment not found!');
+    }
+
+    const due = await appointmentDueServices.getSpecificDueByAppointmentId(appointmentId);
+    if (!due) {
+      throw new CustomError.NotFoundError('Due not found!');
+    }
+
+    const dueAmount = new Big(due.due.amount);
+    const paymentAmount = new Big(paymentData.amount);
+
+    if (dueAmount.toFixed(2) !== paymentAmount.toFixed(2)) {
+      throw new CustomError.BadRequestError(`You are trying to pay ${paymentAmount.toFixed(2)} but due amount is ${dueAmount.toFixed(2)}`);
+    }
+
+    // Create payment history
+    const paymentPayload = {
+      user: new mongoose.Types.ObjectId(appointment.patient),
+      purpose: 'Pay appointment due fee',
+      transactionId: paymentData.transactionId,
+      currency: paymentData.currency,
+      amount: paymentData.amount,
+      paymentType: 'debit',
+    };
+
+    const payment = await paymentHistoryUtils.createPaymentHistory(paymentPayload);
+    if (!payment) {
+      throw new CustomError.BadRequestError('Failed to process payment!');
+    }
+
+    if (appointment.status !== 'completed') {
+      // Move due fee to hold fee
+      appointment.feeInfo.holdFee.amount = new Big(appointment.feeInfo.holdFee.amount).plus(paymentAmount).toNumber();
+      appointment.feeInfo.dueFee.amount = new Big(appointment.feeInfo.dueFee.amount).minus(paymentAmount).toNumber();
+    } else {
+      appointment.feeInfo.holdFee.amount = new Big(appointment.feeInfo.holdFee.amount).plus(paymentAmount).toNumber();
+      appointment.feeInfo.dueFee.amount = new Big(appointment.feeInfo.dueFee.amount).minus(paymentAmount).toNumber();
+
+      //! payout to therapist bank account and add the amount to therapist wallet hold balance
+
+      await walletServices.createOrUpdateSpecificWallet(appointment.therapist as unknown as string, {
+        holdBalance: {
+          amount: paymentAmount.toNumber(),
+          currency: CURRENCY_ENUM.USD,
+        },
+      });
+    }
+
+    await appointment.save();
+
+    // Delete due record
+    await appointmentDueServices.deleteSpecificDueByAppointmentId(appointmentId);
+
+    // Create payment success notification
+    await notificationUtils.createNotification({
+      consumer: new mongoose.Types.ObjectId(appointment.patient),
+      content: {
+        title: 'Payment Successful',
+        message: `Your payment for the appointment due has been successfully processed!`,
+        source: {
+          type: 'paymentHistory',
+          id: payment._id as unknown as Types.ObjectId,
+        },
+      },
+    });
+
+    // session.commitTransaction();
+    // session.endSession();
+
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      status: 'success',
+      message: 'Payment successful',
+    });
+  } catch (error) {
+    // await session.abortTransaction();
+    // session.endSession();
+    throw error;
+  }
+});
+
+// controller for appointment mark as completed
+const markAppointmentAsCompleted = asyncHandler(async (req: Request, res: Response) => {
+  const { appointmentId, userId } = req.body;
+  if (!appointmentId || !userId) {
+    throw new CustomError.BadRequestError('appointmentId and userId are required!');
+  }
+
+  const appointment = await appointmentService.retriveSpecificAppointmentByAppointmentId(appointmentId);
   if (!appointment) {
-    throw new CustomError.NotFoundError('Appointment not found!');
-  }
-  
-  const due = await appointmentDueServices.getSpecificDueByAppointmentId(appointmentId);
-  if (!due) {
-    throw new CustomError.NotFoundError('Due not found!');
+    throw new CustomError.NotFoundError('Appointment not found');
   }
 
-  const paymentPayload = {
-    user: new mongoose.Types.ObjectId(appointment.patient),
-    purpose: 'Pay appointment due fee',
-    transactionId: paymentData.transactionId,
-    currency: paymentData.currency,
-    amount: paymentData.amount,
-    paymentType: 'debit',
+  const therapistUser = await userServices.getSpecificUser(appointment.therapist as unknown as string);
+  const patientUser = await userServices.getSpecificUser(appointment.patient as unknown as string);
+
+  // check if the appointment is already completed
+  if (appointment.status === 'completed') {
+    throw new CustomError.BadRequestError('Appointment is already completed');
   }
 
-  const payment = await paymentHistoryUtils.createPaymentHistory(paymentPayload);
-  if(!payment){
-    throw new CustomError.BadRequestError('Failed to make payment!');
+  // only therapist can mark the appointment as completed
+  if (appointment.therapist.toString() !== userId) {
+    throw new CustomError.BadRequestError('Only therapist can mark the appointment as completed');
   }
 
-  // make notification for the payment
+  // only approved and rescheduled appointments can be marked as completed
+  if (appointment.status !== 'approved' && appointment.status !== 'rescheduled') {
+    throw new CustomError.BadRequestError('Only approved and rescheduled appointments can be marked as completed');
+  }
+
+  //! payout to therapist bank for the appointment hold fee when get payment gateway
+
+  // create payment history for therapist
+  paymentHistoryUtils.createPaymentHistory({
+    user: new mongoose.Types.ObjectId(appointment.therapist as unknown as string),
+    purpose: 'Payment accepted',
+    transactionId: 'adsfsdf', // tnx id come from payment gateway
+    currency: CURRENCY_ENUM.USD,
+    amount: Number(appointment.feeInfo.holdFee.amount.toFixed(2)),
+    paymentType: 'credit',
+  });
+
+  // create notification for therapist
   await notificationUtils.createNotification({
-    consumer: new mongoose.Types.ObjectId(appointment.patient),
+    consumer: new mongoose.Types.ObjectId(appointment.therapist as unknown as string),
     content: {
-      title: 'Payment Successfull',
-      message: `Your payment for appointment due is successfull!`,
+      title: 'Payment Accepted',
+      message: `Your appointment with ${patientUser.firstName} ${patientUser.lastName} payment has been accepted!`,
       source: {
-        type: 'paymentHistory',
-        id: payment._id as unknown as Types.ObjectId,
+        type: 'appointment',
+        id: new mongoose.Types.ObjectId(appointment._id as unknown as string),
       },
     },
   });
 
-  // delete due document for the appointment from database
-  await appointmentDueServices.deleteSpecificDueByAppointmentId(appointmentId);
+  // create invoice for the therapist
+  await invoiceUtils.createInvoice({
+    user: {
+      type: 'therapist',
+      id: new mongoose.Types.ObjectId(appointment.therapist as unknown as string),
+    },
+    appointment: appointment._id as unknown as Types.ObjectId,
+  });
+
+  // create notification for patient
+  await notificationUtils.createNotification({
+    consumer: new mongoose.Types.ObjectId(appointment.patient as unknown as string),
+    content: {
+      title: 'Appointment Completed',
+      message: `Your appointment with ${therapistUser.firstName} ${therapistUser.lastName} has been completed!`,
+      source: {
+        type: 'appointment',
+        id: new mongoose.Types.ObjectId(appointment._id as unknown as string),
+      },
+    },
+  });
+
+  appointment.status = 'completed';
+  await appointment.save();
+
+  // add amount to the therapist's wallet hold balance
+  await walletServices.createOrUpdateSpecificWallet(appointment.therapist as unknown as string, {
+    holdBalance: {
+      amount: Number(appointment.feeInfo.holdFee.amount.toFixed(2)),
+      currency: CURRENCY_ENUM.USD,
+    },
+  });
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     status: 'success',
-    message: 'Payment successfull',
+    message: 'Appointment marked as completed successfully',
   });
 });
 
 export default {
   createAppointment,
   getAppointmentsByUserAndStatus,
+  getTodayApprovedAppointmentsByTherapist,
   getAvailableSlotsByDateAndTherapist,
   cancelAppointmentByPatientBeforeApproved,
   cancelAppointmentByPatientAfterApproved,
@@ -656,4 +812,6 @@ export default {
   rescheduleAppointmentByTherapistAfterMissed,
   getSpecificAppointment,
   getAppointments,
+  payPatientAppointmentDueAmount,
+  markAppointmentAsCompleted,
 };

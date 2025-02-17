@@ -8,18 +8,19 @@ const createInvoice = async (data: Partial<IInvoice>) => {
 
 // service for get specific invoice by id
 const getInvoiceById = async (invoiceId: string) => {
-  return await Invoice.findById(invoiceId).populate({
-    path: 'user.id',
-    select: 'firstName lastName email phone',
-  })
-  .populate({
-    path: 'appointment',
-    select: 'date slot feeInfo.bookedFee feeInfo.patientTransactionId feeInfo.therapistTransactionId',
-    populate: {
-      path: 'therapist',
-      select: 'firstName lastName'
-    }
-  });
+  return await Invoice.findById(invoiceId)
+    .populate({
+      path: 'user.id',
+      select: 'firstName lastName email phone',
+    })
+    .populate({
+      path: 'appointment',
+      select: 'date slot feeInfo.bookedFee feeInfo.patientTransactionId feeInfo.therapistTransactionId',
+      populate: {
+        path: 'therapist',
+        select: 'firstName lastName',
+      },
+    });
 };
 
 // service for get all invoices by userId
@@ -43,11 +44,11 @@ const getAllInvoicesByUserId = async (userId: string, searchQuery: string, skip:
     })
     .populate({
       path: 'appointment',
-      select: 'date slot feeInfo.bookedFee feeInfo.patientTransactionId feeInfo.therapistTransactionId',
+      select: 'date slot feeInfo.mainFee feeInfo.patientTransactionId feeInfo.therapistTransactionId',
       populate: {
         path: 'therapist',
-        select: 'firstName lastName'
-      }
+        select: 'firstName lastName',
+      },
     });
 };
 

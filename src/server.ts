@@ -4,6 +4,9 @@ import app from './app';
 import http from 'http';
 import { Server } from 'socket.io';
 import configSocket from './app/socket/config.socket';
+import cron from 'node-cron';
+import appointmentService from './app/modules/appointmentModule/appointment.service';
+import { sendNotificationBefore1Hour } from './app/modules/appointmentModule/appointment.utils';
 
 // let server: any;
 const server = http.createServer(app);
@@ -23,6 +26,16 @@ configSocket(io);
 process.on('uncaughtException', (error) => {
   console.log('uncaughtException error', error);
   process.exit(1);
+});
+
+// schedully update appointment status (make missed when appointment date is past using node-cron)
+cron.schedule('*/15 * * * *', async () => {
+  // Runs every hour
+  // console.log('Checking for missed appointments...');
+  await appointmentService.updateAllPastAppointments();
+  console.log('Missed appointments updated successfully.');
+  await sendNotificationBefore1Hour();
+  console.log('Notifications sent successfully.');
 });
 
 const startServer = async () => {

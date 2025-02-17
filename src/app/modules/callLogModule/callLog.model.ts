@@ -29,7 +29,10 @@ const callLogSchema = new mongoose.Schema<ICallLog>(
       required: true,
     },
     duration: {
-      value: Number,
+      value: {
+        type: Number,
+        default: 0,
+      },
       type: {
         type: String,
         enum: ['seconds'],
@@ -38,7 +41,6 @@ const callLogSchema = new mongoose.Schema<ICallLog>(
     },
     recordingUrl: {
       type: String,
-      required: true,
     },
     status: {
       type: String,

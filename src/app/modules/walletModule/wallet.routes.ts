@@ -5,4 +5,6 @@ const walletRouter = express.Router();
 
 walletRouter.get('/retrive/user/:userId', walletControllers.getSpecificWalletByUserId);
 
+walletRouter.post('/add/balance', walletControllers.addBalanceToWallet);
+
 export default walletRouter;

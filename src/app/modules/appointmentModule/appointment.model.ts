@@ -30,6 +30,10 @@ const appointmentSchema = new mongoose.Schema<IAppointment>(
     // },
     feeInfo: {
       feeStatus: { type: String, enum: ['paid', 'hold'], default: 'hold' },
+      mainFee: {
+        amount: { type: Number, default: 0 },
+        currency: { type: String, enum: CURRENCY_ENUM, default: CURRENCY_ENUM.USD },
+      },
       bookedFee: {
         amount: { type: Number, default: 0 },
         currency: { type: String, enum: CURRENCY_ENUM, default: CURRENCY_ENUM.USD },

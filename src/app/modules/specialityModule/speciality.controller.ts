@@ -59,17 +59,18 @@ const updateSpecificSpeciality = asyncHandler(async (req: Request, res: Response
   const { id } = req.params;
   const data = req.body;
   const files = req.files;
-  const updatedSpeciality = await specialityService.updateSpecificSpeciality(id, data);
-
+  
   if (files) {
     const specialityImagePath = await fileUploader(files as FileArray, `speciality-image`, 'image');
     data.image = specialityImagePath;
   }
-
+  
+  const updatedSpeciality = await specialityService.updateSpecificSpeciality(id, data);
+  
   if (!updatedSpeciality.modifiedCount) {
     throw new CustomError.BadRequestError('Failed to update Speciality!');
   }
-
+  
   sendResponse(res, {
     statusCode: 200,
     status: 'success',
