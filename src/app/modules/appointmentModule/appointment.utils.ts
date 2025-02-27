@@ -47,7 +47,7 @@ export async function sendNotificationBefore1Hour() {
         await Promise.all([
           notificationUtils.createNotification({
             consumer: new mongoose.Types.ObjectId(appointment.patient),
-            content: {
+            content: {                                                                                                    
               title: 'Upcoming Appointment Reminder – 1 Hour Left.',
               message: `Dear ${patient.firstName}, your appointment with ${therapist.firstName} ${therapist.lastName} starts in 1 hour. Please ensure you're ready!`,
               source: { type: 'appointment', id: appointment._id as unknown as Types.ObjectId },

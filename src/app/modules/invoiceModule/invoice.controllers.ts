@@ -5,6 +5,7 @@ import { Request, Response } from 'express';
 import invoiceServices from './invoice.services';
 import invoiceUtils from './invoice.utils';
 import mongoose from 'mongoose';
+import CustomError from '../../errors';
 
 // controller for retrive all invoices by user id
 const getAllInvoicesByUserId = asyncHandler(async (req: Request, res: Response) => {
@@ -14,13 +15,13 @@ const getAllInvoicesByUserId = asyncHandler(async (req: Request, res: Response) 
   const limit = parseInt(req.query.limit as string) || 8;
 
   // create a invoice
-//   await invoiceUtils.createInvoice({
-//     user: {
-//         type: 'therapist',
-//         id: new mongoose.Types.ObjectId(userId),
-//     },
-//     appointment: new mongoose.Types.ObjectId(userId)
-//   })
+  //   await invoiceUtils.createInvoice({
+  //     user: {
+  //         type: 'therapist',
+  //         id: new mongoose.Types.ObjectId(userId),
+  //     },
+  //     appointment: new mongoose.Types.ObjectId(userId)
+  //   })
 
   const skip = (page - 1) * limit;
   const invoices = await invoiceServices.getAllInvoicesByUserId(userId, query as string, skip, limit);
@@ -55,7 +56,24 @@ const getSpecificInvoiceById = asyncHandler(async (req: Request, res: Response) 
   });
 });
 
+// retrieve invoice by appointment id
+const getInvoiceByAppointmentId = asyncHandler(async (req: Request, res: Response) => {
+  const { appointmentId } = req.params;
+  const invoice = await invoiceServices.retrieveInvoiceByAppointmentId(appointmentId);
+  if (!invoice) {
+    throw new CustomError.NotFoundError('Invoice not found!');
+  }
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    status: 'success',
+    message: 'Invoice retrieved successfully',
+    data: invoice,
+  });
+});
+
 export default {
   getAllInvoicesByUserId,
   getSpecificInvoiceById,
+  getInvoiceByAppointmentId,
 };

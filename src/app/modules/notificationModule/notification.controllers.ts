@@ -3,6 +3,7 @@ import asyncHandler from '../../../shared/asyncHandler';
 import notificationServices from './notification.services';
 import sendResponse from '../../../shared/sendResponse';
 import { StatusCodes } from 'http-status-codes';
+import notFound from '../../middlewares/notFound';
 
 // controller for retrive all notifications by consumer id
 const getAllNotificationsByConsumerId = asyncHandler(async (req: Request, res: Response) => {

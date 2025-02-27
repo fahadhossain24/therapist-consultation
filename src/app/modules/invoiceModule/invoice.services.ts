@@ -52,8 +52,26 @@ const getAllInvoicesByUserId = async (userId: string, searchQuery: string, skip:
     });
 };
 
+// service for retrieve invoice by appointment id
+const retrieveInvoiceByAppointmentId = async (appointmentId: string) => {
+  return await Invoice.find({ appointment: appointmentId })
+    .populate({
+      path: 'user.id',
+      select: 'firstName lastName email phone',
+    })
+    .populate({
+      path: 'appointment',
+      select: 'date slot feeInfo.mainFee feeInfo.patientTransactionId feeInfo.therapistTransactionId',
+      populate: {
+        path: 'therapist',
+        select: 'firstName lastName',
+      },
+    });
+};
+
 export default {
   createInvoice,
   getInvoiceById,
   getAllInvoicesByUserId,
+  retrieveInvoiceByAppointmentId
 };

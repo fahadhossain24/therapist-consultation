@@ -18,6 +18,7 @@ const dismissNotification = async (notificationId: string) => {
 
 //service for delete all notifications by consumer id
 const deleteAllNotifications = async (consumerId: string) => {
+    console.log(consumerId)
     return await Notification.deleteMany({ consumer: consumerId });            
 };
 

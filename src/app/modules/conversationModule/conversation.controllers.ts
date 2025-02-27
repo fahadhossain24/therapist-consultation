@@ -76,6 +76,11 @@ const retriveConversationByAppointmentId = asyncHandler(async (req: Request, res
     throw new CustomError.BadRequestError('Invalid appointment id!');
   }
 
+  const appointment = appointmentService.retriveSpecificAppointmentByAppointmentId(appointmentId);
+  if(!appointment){
+    throw new CustomError.NotFoundError("Appointment not found!");
+  }
+
   const conversation = await conversationService.retriveConversationByAppointmentId(appointmentId);
   if (!conversation) {
     throw new CustomError.NotFoundError("Conversation channel hasn't initialized yet, wait for approved appointment!");
