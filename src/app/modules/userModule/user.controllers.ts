@@ -98,8 +98,10 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
     throw new CustomError.BadRequestError('Failed to create new user!');
   }
 
-  if(userData.role === 'therapist') {
-    await therapistProfessionalUtils.createOrUpdateTherapistProfessional(user._id as unknown as string, { therapist: user._id as unknown as Types.ObjectId });
+  if (userData.role === 'therapist') {
+    await therapistProfessionalUtils.createOrUpdateTherapistProfessional(user._id as unknown as string, {
+      therapist: user._id as unknown as Types.ObjectId,
+    });
   }
 
   if (profile) {
@@ -155,13 +157,27 @@ const getSpecificUser = asyncHandler(async (req: Request, res: Response) => {
 
 // service for get specific user by id
 const getAllUser = asyncHandler(async (req: Request, res: Response) => {
-  const {role} = req.query
-  const users = await userServices.getAllUser(role as string);
+  const { role } = req.query;
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 8;
+
+  const skip = (page - 1) * limit;
+  const users = await userServices.getAllUser(role as string, skip, limit);
+  const allUser = await userServices.getAllDocuments();
+
+  const totalUser =  allUser || 0;
+  const totalPages = Math.ceil(totalUser / limit);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     status: 'success',
     message: 'User retrive successfull',
+    meta: {
+      totalData: totalUser,
+      totalPage: totalPages,
+      currentPage: page,
+      limit: limit,
+    },
     data: users,
   });
 });
@@ -245,7 +261,7 @@ const updateSpecificUser = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const updatedUser = await userServices.updateSpecificUser(id, userData);
-  console.log(updatedUser)
+  console.log(updatedUser);
   // console.log(updatedUser, updatedProfile)
   if (!updatedUser?.modifiedCount) {
     throw new CustomError.BadRequestError('Failed to update user!');

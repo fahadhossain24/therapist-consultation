@@ -35,9 +35,17 @@ const getAllPaymentHistories = async (searchQuery: string, skip: number, limit: 
   });
 };
 
+// service for get all documents for payment history
+const getAllDocumentsForPaymentHistory = async () => {
+  return await PaymentHistory.countDocuments();
+};
+
+// service for get specific payment history
+
 export default {
   createPaymentHistory,
   getAllPaymentHistoryByUserId,
   deleteAllPaymentHistory,
-  getAllPaymentHistories
+  getAllPaymentHistories,
+  getAllDocumentsForPaymentHistory
 };

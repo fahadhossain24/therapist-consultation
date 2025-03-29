@@ -77,8 +77,8 @@ const retriveConversationByAppointmentId = asyncHandler(async (req: Request, res
   }
 
   const appointment = appointmentService.retriveSpecificAppointmentByAppointmentId(appointmentId);
-  if(!appointment){
-    throw new CustomError.NotFoundError("Appointment not found!");
+  if (!appointment) {
+    throw new CustomError.NotFoundError('Appointment not found!');
   }
 
   const conversation = await conversationService.retriveConversationByAppointmentId(appointmentId);

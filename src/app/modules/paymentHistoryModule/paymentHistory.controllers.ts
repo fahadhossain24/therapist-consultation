@@ -51,10 +51,21 @@ const getAllPaymentHistories = asyncHandler(async (req: Request, res: Response) 
   const skip = (page - 1) * limit;
   const paymentHistories = await paymentHistoryServices.getAllPaymentHistories(searchQuery, skip, limit);
 
+  const allPaymentHistories = await paymentHistoryServices.getAllDocumentsForPaymentHistory();
+
+  const totalPaymentHistories =  allPaymentHistories || 0;
+  const totalPages = Math.ceil(totalPaymentHistories / limit);
+
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     status: 'success',
     message: 'Payment Histories retrive successfull',
+    meta: {
+      totalData: totalPaymentHistories,
+      totalPage: totalPages,
+      currentPage: page,
+      limit: limit,
+    },
     data: paymentHistories,
   });
 });

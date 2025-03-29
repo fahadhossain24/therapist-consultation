@@ -20,7 +20,7 @@ const getSpecificUser = async (id: string): Promise<IUser> => {
 };
 
 // service for get specific user
-const getAllUser = async (role: string): Promise<IUser[]> => {
+const getAllUser = async (role: string, skip: number, limit: number): Promise<IUser[]> => {
   const query: any = {};
   if (role) {
     query.role = role;
@@ -31,7 +31,9 @@ const getAllUser = async (role: string): Promise<IUser[]> => {
       path: 'profile',
       select: '',
     })
-    .select('-password');
+    .select('-password')
+    .skip(skip)
+    .limit(limit);
 };
 
 // service for get specific user
@@ -63,6 +65,11 @@ const deleteSpecificUser = async (id: string, role: string) => {
   return true;
 };
 
+// service for get all document for user
+const getAllDocuments = async () => {
+  return await User.countDocuments();
+}
+
 export default {
   createUser,
   getSpecificUser,
@@ -70,4 +77,5 @@ export default {
   updateSpecificUser,
   deleteSpecificUser,
   getAllUser,
+  getAllDocuments
 };
