@@ -53,7 +53,7 @@ const getAllPaymentHistories = asyncHandler(async (req: Request, res: Response) 
 
   const allPaymentHistories = await paymentHistoryServices.getAllDocumentsForPaymentHistory();
 
-  const totalPaymentHistories =  allPaymentHistories || 0;
+  const totalPaymentHistories = paymentHistories.length || 0;
   const totalPages = Math.ceil(totalPaymentHistories / limit);
 
   sendResponse(res, {

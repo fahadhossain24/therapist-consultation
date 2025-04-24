@@ -20,10 +20,14 @@ const getSpecificUser = async (id: string): Promise<IUser> => {
 };
 
 // service for get specific user
-const getAllUser = async (role: string, skip: number, limit: number): Promise<IUser[]> => {
+const getAllUser = async (role: string, searchQuery: string, skip: number, limit: number): Promise<IUser[]> => {
   const query: any = {};
   if (role) {
     query.role = role;
+  }
+
+  if(searchQuery){
+    query.$text = { $search: searchQuery };
   }
 
   return await User.find(query)

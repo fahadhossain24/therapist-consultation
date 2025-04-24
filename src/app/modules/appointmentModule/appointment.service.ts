@@ -104,7 +104,7 @@ const retriveSpecificAppointmentByAppointmentId = async (appointmentId: string) 
 const getAppointments = async (searchQuery: string, skip: number, limit: number) => {
   const query: any = {};
   if (searchQuery) {
-    query.$text = { $search: searchQuery };
+    query.appointmentId = searchQuery;
   }
   return await Appointment.find(query)
     .skip(skip)

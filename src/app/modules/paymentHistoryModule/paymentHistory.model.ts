@@ -15,5 +15,12 @@ const paymentHistorySchema = new mongoose.Schema<IPaymentHistory>(
   },
 );
 
+paymentHistorySchema.index({
+  currency: 'text',
+  paymentType: 'text',
+  transactionId: 'text',
+  purpose: 'text'
+})
+
 const PaymentHistory = mongoose.model<IPaymentHistory>('paymentHistory', paymentHistorySchema);
 export default PaymentHistory;

@@ -157,15 +157,15 @@ const getSpecificUser = asyncHandler(async (req: Request, res: Response) => {
 
 // service for get specific user by id
 const getAllUser = asyncHandler(async (req: Request, res: Response) => {
-  const { role } = req.query;
+  const { role, searchQuery } = req.query;
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 8;
 
   const skip = (page - 1) * limit;
-  const users = await userServices.getAllUser(role as string, skip, limit);
+  const users = await userServices.getAllUser(role as string, searchQuery as string, skip, limit);
   const allUser = await userServices.getAllDocuments();
 
-  const totalUser =  allUser || 0;
+  const totalUser =  users.length || 0;
   const totalPages = Math.ceil(totalUser / limit);
 
   sendResponse(res, {
