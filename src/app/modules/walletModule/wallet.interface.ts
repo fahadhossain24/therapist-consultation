@@ -1,16 +1,16 @@
-import { Document, Types } from "mongoose";
+import { Document, Types } from 'mongoose';
 
-export interface IWallet extends Document{
+export interface IWallet extends Document {
     user: {
-        type: string,
-        id: Types.ObjectId
-    },
+        type: string;
+        id: Types.ObjectId;
+    };
     balance: {
-        amount: number,
-        currency: string
-    },
+        amount: number;
+        currency: string;
+    };
     holdBalance: {
-        amount: number,
-        currency: string
-    }
+        amount: number;
+        currency: string;
+    };
 }

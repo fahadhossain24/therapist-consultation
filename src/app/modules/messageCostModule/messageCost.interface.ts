@@ -1,9 +1,9 @@
-import { Document } from "mongoose";
+import { Document } from 'mongoose';
 
 export interface IMessageCost extends Document {
     costPerMessage: {
         currency: string;
-        amount: number
+        amount: number;
     };
     maxCharacters: number;
 }

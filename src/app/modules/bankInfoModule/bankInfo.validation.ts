@@ -17,11 +17,15 @@ const createBankInfoZodSchema = z.object({
         accountType: z.string().min(1, 'Account type is required'),
         currency: z.string().min(1, 'Currency is required'),
         isActive: z.boolean().optional(),
-        errorLogs: z.array(z.object({
-            errorCode: z.string().min(1, 'Error code is required'),
-            errorMessage: z.string().min(1, 'Error message is required'),
-            timestamp: z.date().optional(),
-        })).optional(),
+        errorLogs: z
+            .array(
+                z.object({
+                    errorCode: z.string().min(1, 'Error code is required'),
+                    errorMessage: z.string().min(1, 'Error message is required'),
+                    timestamp: z.date().optional(),
+                }),
+            )
+            .optional(),
     }),
 });
 

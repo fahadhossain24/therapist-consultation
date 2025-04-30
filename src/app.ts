@@ -18,31 +18,31 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 if (config.node_env === 'development') {
-  app.use(morgan('dev'));
+    app.use(morgan('dev'));
 }
 app.use(cookieParser());
 app.use(fileUpload());
 app.use('/v1/uploads', express.static(path.join('uploads')));
 const limiter = rateLimit({
-  max: 150,
-  windowMs: 15 * 60 * 1000,
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-  message: 'Too many request found from your IP. Please try again after 15 minutes.',
+    max: 150,
+    windowMs: 15 * 60 * 1000,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: 'Too many request found from your IP. Please try again after 15 minutes.',
 });
 // app.use(limiter);
 
 // application middleware
-app.use('/', routers)
+app.use('/', routers);
 
 app.get('/health_check', (req: Request, res: Response) => {
-  res.status(StatusCodes.OK).json({
-    message: 'Welcome to the server. Server health is good.',
-  });
+    res.status(StatusCodes.OK).json({
+        message: 'Welcome to the server. Server health is good.',
+    });
 });
 
 app.get('/favicon.ico', (req: Request, res: Response) => {
-  res.status(204).end(); // No Content
+    res.status(204).end(); // No Content
 });
 
 // Error handling middlewares

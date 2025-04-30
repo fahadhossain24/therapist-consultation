@@ -3,9 +3,9 @@ import notificationServices from './notification.services';
 
 // function for create notification
 const createNotification = async (data: Partial<INotification>) => {
-  return await notificationServices.createNotification(data);
+    return await notificationServices.createNotification(data);
 };
 
 export default {
-  createNotification,
+    createNotification,
 };

@@ -6,7 +6,12 @@ import authentication from '../../middlewares/authorization';
 
 const messageCostRouter = Router();
 
-messageCostRouter.post('/create', authentication('admin', 'super-admin'), requestValidator(MessageCostValidationZodSchema.createMessageCostZodSchema), messageCostController.createMessageCost);
+messageCostRouter.post(
+    '/create',
+    authentication('admin', 'super-admin'),
+    requestValidator(MessageCostValidationZodSchema.createMessageCostZodSchema),
+    messageCostController.createMessageCost,
+);
 messageCostRouter.get('/retrive', authentication('admin', 'super-admin'), messageCostController.getMessageCosts);
 
 messageCostRouter.patch(
@@ -14,12 +19,12 @@ messageCostRouter.patch(
     authentication('admin', 'super-admin'),
     requestValidator(MessageCostValidationZodSchema.getSpecificMessageCostZodSchema),
     messageCostController.updateSpecificMessageCost,
-  );
-  
-  messageCostRouter.delete(
+);
+
+messageCostRouter.delete(
     '/delete/:id',
     authentication('admin', 'super-admin'),
     requestValidator(MessageCostValidationZodSchema.getSpecificMessageCostZodSchema),
     messageCostController.deleteSpecificMessageCost,
-  );
+);
 export default messageCostRouter;

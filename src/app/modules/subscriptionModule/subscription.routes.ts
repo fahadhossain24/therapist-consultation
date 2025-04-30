@@ -7,31 +7,31 @@ import authentication from '../../middlewares/authorization';
 const subscriptionRouter = Router();
 
 subscriptionRouter.post(
-  '/create',
-  authentication('admin', 'super-admin'),
-  requestValidator(SubscriptionValidationZodSchema.createSubscriptionZodSchema),
-  subscriptionController.createSubscription,
+    '/create',
+    authentication('admin', 'super-admin'),
+    requestValidator(SubscriptionValidationZodSchema.createSubscriptionZodSchema),
+    subscriptionController.createSubscription,
 );
 subscriptionRouter.get('/retrive/search', authentication('admin', 'super-admin'), subscriptionController.getSubscriptions);
 
 subscriptionRouter.patch(
-  '/update/:id',
-  authentication('admin', 'super-admin'),
-  requestValidator(SubscriptionValidationZodSchema.getSpecificSubscriptionZodSchema),
-  subscriptionController.updateSpecificSubscription,
+    '/update/:id',
+    authentication('admin', 'super-admin'),
+    requestValidator(SubscriptionValidationZodSchema.getSpecificSubscriptionZodSchema),
+    subscriptionController.updateSpecificSubscription,
 );
 subscriptionRouter.delete(
-  '/delete/:id',
-  authentication('admin', 'super-admin'),
-  requestValidator(SubscriptionValidationZodSchema.getSpecificSubscriptionZodSchema),
-  subscriptionController.deleteSpecificSubscription,
+    '/delete/:id',
+    authentication('admin', 'super-admin'),
+    requestValidator(SubscriptionValidationZodSchema.getSpecificSubscriptionZodSchema),
+    subscriptionController.deleteSpecificSubscription,
 );
 
 subscriptionRouter.get(
-  '/retrive/:id',
-  authentication('admin', 'super-admin'),
-  requestValidator(SubscriptionValidationZodSchema.getSpecificSubscriptionZodSchema),
-  subscriptionController.getSpecificSubscriptionById,
+    '/retrive/:id',
+    authentication('admin', 'super-admin'),
+    requestValidator(SubscriptionValidationZodSchema.getSpecificSubscriptionZodSchema),
+    subscriptionController.getSpecificSubscriptionById,
 );
 
 export default subscriptionRouter;

@@ -13,11 +13,7 @@ bankInfoRouter.post(
     bankInfoController.createBankInfo,
 );
 
-bankInfoRouter.get(
-    '/retrive',
-    authentication('admin', 'super-admin', 'therapist'),
-    bankInfoController.getBankInfos,
-);
+bankInfoRouter.get('/retrive', authentication('admin', 'super-admin', 'therapist'), bankInfoController.getBankInfos);
 
 bankInfoRouter.get(
     '/retrive/:id',

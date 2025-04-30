@@ -1,14 +1,14 @@
-import { Document } from "mongoose";
+import { Document } from 'mongoose';
 
 export interface ISubscription extends Document {
     name: string;
     price: {
         currency: string;
-        amount: number
+        amount: number;
     };
     validity: {
         type: string;
-        value: number
+        value: number;
     };
     features: string[];
 }

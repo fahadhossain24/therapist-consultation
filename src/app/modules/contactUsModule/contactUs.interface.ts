@@ -1,7 +1,7 @@
-import { Document } from "mongoose";
+import { Document } from 'mongoose';
 
-export interface IContactUs extends Document{
-    email: string,
-    createdAt: Date,
-    updatedAt: Date
+export interface IContactUs extends Document {
+    email: string;
+    createdAt: Date;
+    updatedAt: Date;
 }

@@ -4,4 +4,4 @@ module.exports = {
     // testMatch: ['<rootDir>/src/**/*.spec.ts'],
     transform: {},
     // testTimeout: 30000,
-}
+};

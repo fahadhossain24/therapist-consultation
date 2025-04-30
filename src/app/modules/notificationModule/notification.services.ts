@@ -1,5 +1,5 @@
-import { INotification } from "./notification.interface";
-import Notification from "./notification.model";
+import { INotification } from './notification.interface';
+import Notification from './notification.model';
 
 // service for create new notification
 const createNotification = async (data: Partial<INotification>) => {
@@ -18,13 +18,13 @@ const dismissNotification = async (notificationId: string) => {
 
 //service for delete all notifications by consumer id
 const deleteAllNotifications = async (consumerId: string) => {
-    console.log(consumerId)
-    return await Notification.deleteMany({ consumer: consumerId });            
+    console.log(consumerId);
+    return await Notification.deleteMany({ consumer: consumerId });
 };
 
 export default {
     createNotification,
     getAllNotification,
     dismissNotification,
-    deleteAllNotifications
+    deleteAllNotifications,
 };

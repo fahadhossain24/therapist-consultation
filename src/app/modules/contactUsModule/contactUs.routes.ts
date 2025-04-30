@@ -8,6 +8,10 @@ contactUsRouter.post('/create-or-update', authorization('super-admin', 'admin'),
 
 contactUsRouter.get('/retrive', authorization('super-admin', 'admin'), contactUsControllers.getContactUs);
 
-contactUsRouter.post('/send-email', authorization('super-admin', 'admin', 'patient', 'therapist'), contactUsControllers.sendMailToContactUs);
+contactUsRouter.post(
+    '/send-email',
+    authorization('super-admin', 'admin', 'patient', 'therapist'),
+    contactUsControllers.sendMailToContactUs,
+);
 
 export default contactUsRouter;

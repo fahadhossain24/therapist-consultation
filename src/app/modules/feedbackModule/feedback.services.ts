@@ -3,16 +3,16 @@ import Feedback from './feedback.model';
 
 // service for create or update feedback by patient
 const createOrUpdateFeedback = async (data: Partial<IFeedback>) => {
-  return await Feedback.findOneAndUpdate(
-    { patient: data.patient },
-    data,
-    { runValidators: true, upsert: true, new: true }, // Add upsert: true
-  );
+    return await Feedback.findOneAndUpdate(
+        { patient: data.patient },
+        data,
+        { runValidators: true, upsert: true, new: true }, // Add upsert: true
+    );
 };
 
 // service to get all feedbacks for a specific therapist
 const getAllFeedbacksByTherapistId = async (therapistId: string) => {
-  return await Feedback.find({ therapist: therapistId });
+    return await Feedback.find({ therapist: therapistId });
 };
 
 // get specific feedback by outletId
@@ -43,6 +43,6 @@ const getAllFeedbacksByTherapistId = async (therapistId: string) => {
 // };
 
 export default {
-  createOrUpdateFeedback,
-  getAllFeedbacksByTherapistId,
+    createOrUpdateFeedback,
+    getAllFeedbacksByTherapistId,
 };

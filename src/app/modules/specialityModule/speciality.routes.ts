@@ -7,26 +7,26 @@ import specialityController from './speciality.controller';
 const specialityRouter = Router();
 
 specialityRouter.post(
-  '/create',
-  authentication('admin', 'super-admin'),
-  requestValidator(SpecialityValidationZodSchema.createSpecialityZodSchema),
-  specialityController.createSpeciality,
+    '/create',
+    authentication('admin', 'super-admin'),
+    requestValidator(SpecialityValidationZodSchema.createSpecialityZodSchema),
+    specialityController.createSpeciality,
 );
 
 specialityRouter.get('/retrive/search', specialityController.getSpecialities);
 
 specialityRouter.patch(
-  '/update/:id',
-  authentication('admin', 'super-admin'),
-  requestValidator(SpecialityValidationZodSchema.getSpecificSpecialityZodSchema),
-  specialityController.updateSpecificSpeciality,
+    '/update/:id',
+    authentication('admin', 'super-admin'),
+    requestValidator(SpecialityValidationZodSchema.getSpecificSpecialityZodSchema),
+    specialityController.updateSpecificSpeciality,
 );
 
 specialityRouter.delete(
-  '/delete/:id',
-  authentication('admin', 'super-admin'),
-  requestValidator(SpecialityValidationZodSchema.getSpecificSpecialityZodSchema),
-  specialityController.deleteSpecificSpeciality,
+    '/delete/:id',
+    authentication('admin', 'super-admin'),
+    requestValidator(SpecialityValidationZodSchema.getSpecificSpecialityZodSchema),
+    specialityController.deleteSpecificSpeciality,
 );
 
 export default specialityRouter;

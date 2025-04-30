@@ -28,7 +28,7 @@ class BankInfoService {
         return await BankInfo.updateMany({}, { isActive: false }, { session, runValidators: true });
     }
 
-    public async retriveBankInfoWithTrueByBankId(id: string){
+    public async retriveBankInfoWithTrueByBankId(id: string) {
         return await BankInfo.findOne({ _id: id, isActive: true });
     }
 

@@ -1,4 +1,4 @@
-import { Document, Types } from "mongoose";
+import { Document, Types } from 'mongoose';
 
 export interface INotification extends Document {
     consumer: Types.ObjectId;
@@ -7,10 +7,10 @@ export interface INotification extends Document {
         message: string;
         source: {
             type: string;
-            id: Types.ObjectId
-        }
-    },
-    isDismissed: boolean,
-    createdAt: Date,
-    updatedAt: Date
+            id: Types.ObjectId;
+        };
+    };
+    isDismissed: boolean;
+    createdAt: Date;
+    updatedAt: Date;
 }

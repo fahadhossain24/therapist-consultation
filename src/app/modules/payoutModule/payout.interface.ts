@@ -1,4 +1,4 @@
-import { Document, Types } from "mongoose";
+import { Document, Types } from 'mongoose';
 
 export interface IPayout extends Document {
     user: Types.ObjectId;
@@ -8,7 +8,7 @@ export interface IPayout extends Document {
         bankName: string;
         accountNumber: string;
         countryCode: string;
-    },
+    };
     currency: string;
     amount: number;
     status: string;
