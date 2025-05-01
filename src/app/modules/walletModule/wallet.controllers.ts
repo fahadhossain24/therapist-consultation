@@ -10,6 +10,7 @@ import notificationUtils from '../notificationModule/notification.utils';
 import invoiceServices from '../invoiceModule/invoice.services';
 import { paypalServiceInstancePromise } from '../../../libs/paypal/services/paypal.services';
 import { CURRENCY_ENUM } from '../../../enums/currency';
+import config from '../../../config';
 
 // controller for retrive specific wallet by user id
 const getSpecificWalletByUserId = asyncHandler(async (req: Request, res: Response) => {
@@ -33,7 +34,10 @@ const initiateWalletTopUp = asyncHandler(async (req: Request, res: Response) => 
 
     const paymentService = await paypalServiceInstancePromise;
 
-    const order = await paymentService.createPaypalOrder(amount, CURRENCY_ENUM.USD, userId);
+    const cancelUrl = `${config.server_url}/v1/wallet/top-up/cancel`;
+    const returnUrl = `${config.server_url}/v1/wallet/top-up/return`;
+
+    const order = await paymentService.createPaypalOrder(amount, CURRENCY_ENUM.USD, cancelUrl, returnUrl, userId);
 
     sendResponse(res, {
         statusCode: StatusCodes.OK,

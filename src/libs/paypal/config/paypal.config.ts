@@ -19,6 +19,4 @@ export const paypalConfig = {
         clientSecret: process.env.PAYPAL_SANDBOX_CLIENT_SECRET,
         baseUrl: process.env.PAYPAL_SANDBOX_BASE_URL,
     },
-    return_url: `${serverUrl}/v1/wallet/top-up/return`,
-    cancel_url: `${serverUrl}/v1/wallet/top-up/cancel`,
 };

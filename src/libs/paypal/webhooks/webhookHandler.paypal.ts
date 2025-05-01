@@ -9,8 +9,7 @@ export const handlePayPalWebhook = asyncHandler(async (req: Request, res: Respon
 
     switch (event.event_type) {
         case 'PAYMENT.CAPTURE.COMPLETED':
-            // handle wallet top-up or appointment payment
-            await walletServices.handleWalletTopUpAfterPaymentCapture(event)
+            await walletServices.handleWalletTopUpAfterPaymentCapture(event);
             break;
         case 'PAYMENT.CAPTURE.DENIED':
             // handle wallet top-up or appointment payment

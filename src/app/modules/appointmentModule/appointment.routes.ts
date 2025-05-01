@@ -66,4 +66,20 @@ appointmentRouter.patch(
     appointmentControllers.markAppointmentAsCompleted,
 );
 
+appointmentRouter.post(
+    '/appointment-payment/initiate',
+    authorization('patient'),
+    appointmentControllers.initiateAppointmentPaymentOrder,
+);
+
+appointmentRouter.get(
+    '/appointment-payment/return',
+    appointmentControllers.returnAppointmentPaymentOrder,
+);
+
+appointmentRouter.get(
+    '/appointment-payment/cancel',
+    appointmentControllers.cancelAppointmentPaymentOrder,
+);
+
 export default appointmentRouter;

@@ -21,6 +21,9 @@ import SocketManager from '../../socket/manager.socket';
 import appointmentDueServices from '../appointmentDueModule/appointmentDue.services';
 import Big from 'big.js';
 import { CURRENCY_ENUM } from '../../../enums/currency';
+import { paypalServiceInstancePromise } from '../../../libs/paypal/services/paypal.services';
+import config from '../../../config';
+import bankInfoServices from '../bankInfoModule/bankInfo.service';
 
 // controller for create new appointment
 const createAppointment = asyncHandler(async (req: Request, res: Response) => {
@@ -738,12 +741,25 @@ const markAppointmentAsCompleted = asyncHandler(async (req: Request, res: Respon
     }
 
     //! payout to therapist bank for the appointment hold fee when get payment gateway
+    const paymentService = await paypalServiceInstancePromise;
+    const bankInfo = await bankInfoServices.getSpecificBankInfoByUserId(appointment.therapist as unknown as string);
+    let payoutResponse;
+    try {
+        payoutResponse = await paymentService.paypalPayout(
+            bankInfo!.paypalEmail as string,
+            appointment.feeInfo.holdFee.amount.toFixed(2),
+            CURRENCY_ENUM.USD,
+            appointmentId,
+        );
+    } catch (error) {
+        throw new CustomError.BadRequestError('PayPal payout failed. Please try again later.');
+    }
 
     // create payment history for therapist
     paymentHistoryUtils.createPaymentHistory({
         user: new mongoose.Types.ObjectId(appointment.therapist as unknown as string),
         purpose: 'Payment accepted',
-        transactionId: 'adsfsdf', // tnx id come from payment gateway
+        transactionId: payoutResponse.batch_header.payout_batch_id, // tnx id come from payment gateway
         currency: CURRENCY_ENUM.USD,
         amount: Number(appointment.feeInfo.holdFee.amount.toFixed(2)),
         paymentType: 'credit',
@@ -802,6 +818,66 @@ const markAppointmentAsCompleted = asyncHandler(async (req: Request, res: Respon
     });
 });
 
+// controller for initiate appointment payment order
+const initiateAppointmentPaymentOrder = asyncHandler(async (req: Request, res: Response) => {
+    const { amount } = req.body;
+    const userId = req.user!._id;
+
+    const paymentService = await paypalServiceInstancePromise;
+
+    const cancelUrl = `${config.server_url}/v1/appointment/appointment-payment/cancel`;
+    const returnUrl = `${config.server_url}/v1/appointment/appointment-payment/return`;
+
+    const order = await paymentService.createPaypalOrder(amount, CURRENCY_ENUM.USD, cancelUrl, returnUrl, userId);
+
+    sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        status: 'success',
+        message: 'Appointment payment order initiated successfully',
+        data: {
+            orderId: order.id,
+            approvalUrl: order.links.find((link: { rel: string; href: string }) => link.rel === 'approve')?.href,
+        },
+    });
+});
+
+// controller for return appointment payment order
+const returnAppointmentPaymentOrder = asyncHandler(async (req: Request, res: Response) => {
+    const orderId = req.query.token as string;
+
+    const paymentService = await paypalServiceInstancePromise;
+    const captureData = await paymentService.capturePaypalOrder(orderId);
+
+    const transactionStatus = captureData.purchase_units[0].payments.captures[0].status;
+    const transactionId = captureData.purchase_units[0].payments.captures[0].id;
+
+    if (transactionStatus !== 'COMPLETED') {
+        return sendResponse(res, {
+            statusCode: StatusCodes.BAD_REQUEST,
+            status: 'fail',
+            message: 'Payment not completed. Please try again.',
+        });
+    }
+
+    sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        status: 'success',
+        message: 'Payment Approved.',
+        data: {
+            transactionId,
+        },
+    });
+});
+
+// controller for cancel appointment payment order
+const cancelAppointmentPaymentOrder = asyncHandler(async (req: Request, res: Response) => {
+    sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        status: 'success',
+        message: 'Appointment payment order cancelled successfully',
+    });
+});
+
 export default {
     createAppointment,
     getAppointmentsByUserAndStatus,
@@ -816,4 +892,7 @@ export default {
     getAppointments,
     payPatientAppointmentDueAmount,
     markAppointmentAsCompleted,
+    initiateAppointmentPaymentOrder,
+    returnAppointmentPaymentOrder,
+    cancelAppointmentPaymentOrder,
 };

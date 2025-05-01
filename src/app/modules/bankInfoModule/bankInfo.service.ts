@@ -16,6 +16,10 @@ class BankInfoService {
         return await BankInfo.findById(id); // No session needed here
     }
 
+    public async getSpecificBankInfoByUserId(userId: string) {
+        return await BankInfo.findOne({ user: userId });
+    }
+
     public async updateSpecificBankInfo(id: string, data: Partial<IBankInfo>) {
         return await BankInfo.updateOne({ _id: id }, data, { runValidators: true }); // No session needed here
     }

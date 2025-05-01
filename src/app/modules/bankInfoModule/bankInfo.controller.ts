@@ -11,7 +11,7 @@ import mongoose from 'mongoose';
 const createBankInfo = asyncHandler(async (req: Request, res: Response) => {
     const bankInfo = req.body;
 
-    isVerifiedSwiftAndIban(bankInfo.swiftCode, bankInfo.iban);
+    // isVerifiedSwiftAndIban(bankInfo.swiftCode, bankInfo.iban);
 
     const newBankInfo = await bankInfoService.createBankInfo(bankInfo);
     if (!newBankInfo) {

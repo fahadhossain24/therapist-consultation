@@ -8,7 +8,7 @@ const bankInfoRouter = Router();
 
 bankInfoRouter.post(
     '/create',
-    authentication('admin', 'super-admin', 'therapist'),
+    authentication('admin', 'super-admin', 'therapist', 'patient'),
     requestValidator(BankInfoValidationZodSchema.createBankInfoZodSchema),
     bankInfoController.createBankInfo,
 );
