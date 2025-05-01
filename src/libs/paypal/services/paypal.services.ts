@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { getPaypalAccessToken, paypalAccount } from '../client/paypal.client';
-import config from '../../../config';
+import { paypalConfig } from '../config/paypal.config';
 
 class PaypalService {
     accessToken: string = '';
@@ -9,7 +9,7 @@ class PaypalService {
         return this;
     };
 
-    createPaypalOrder = async (amount: string, currency: string) => {
+    createPaypalOrder = async (amount: string, currency: string, userId: string) => {
         const response = await axios.post(
             `${paypalAccount.baseUrl}/v2/checkout/orders`,
             {
@@ -20,13 +20,14 @@ class PaypalService {
                             value: amount,
                             currency_code: currency,
                         },
+                        custom_id: userId,
                     },
                 ],
                 application_context: {
                     user_action: 'CONTINUE',
                     brand_name: 'Counta',
-                    cancel_url: 'http://localhost:5002/wallet/add-balance/cencel',
-                    return_url: 'http://localhost:5002/wallet/add-balance/return',
+                    return_url: paypalConfig.return_url,
+                    cancel_url: paypalConfig.cancel_url,
                 },
             },
             {

@@ -23,6 +23,7 @@ import messageRouter from '../modules/messageModule/message.routes';
 import attachmentRouter from '../modules/attachmentModule/attachment.routes';
 import dashboardMatricRouter from '../modules/dashboardMatricModule/dashboardMatric.routes';
 import feedbackRouter from '../modules/feedbackModule/feedback.routes';
+import { handlePayPalWebhook } from '../../libs/paypal/webhooks/webhookHandler.paypal';
 
 const routersVersionOne = express.Router();
 
@@ -48,6 +49,9 @@ routersVersionOne.use('/message', messageRouter);
 routersVersionOne.use('/attachment', attachmentRouter);
 routersVersionOne.use('/dashboard', dashboardMatricRouter);
 routersVersionOne.use('/feedback', feedbackRouter);
+
+// webhook
+routersVersionOne.use('/webhook/paypal', handlePayPalWebhook);
 
 // settings
 routersVersionOne.use('/slider', sliderRouter);

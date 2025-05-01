@@ -32,9 +32,9 @@ const initiateWalletTopUp = asyncHandler(async (req: Request, res: Response) => 
     const userId = req.user!._id;
 
     const paymentService = await paypalServiceInstancePromise;
-    console.log(amount);
-    const order = await paymentService.createPaypalOrder(amount, CURRENCY_ENUM.USD);
-console.log("..................",order)
+
+    const order = await paymentService.createPaypalOrder(amount, CURRENCY_ENUM.USD, userId);
+
     sendResponse(res, {
         statusCode: StatusCodes.OK,
         status: 'success',
@@ -47,54 +47,41 @@ console.log("..................",order)
 });
 
 // controller for add balance to wallet
-const addBalanceToWallet = asyncHandler(async (req: Request, res: Response) => {
-    const { orderId } = req.body;
-    const userId = req.user!._id;
+const returnWalletTopUp = asyncHandler(async (req: Request, res: Response) => {
+    const orderId = req.query.token as string;
 
     const paymentService = await paypalServiceInstancePromise;
     const captureData = await paymentService.capturePaypalOrder(orderId);
 
-    const amount = captureData.purchase_units[0].payments.captures[0].amount.value;
-    const currency = captureData.purchase_units[0].payments.captures[0].amount.currency_code;
-    const transactionId = captureData.purchase_units[0].payments.captures[0].id;
+    const transactionStatus = captureData.purchase_units[0].payments.captures[0].status;
 
-    const wallet = await walletServices.createOrUpdateSpecificWallet(userId, {
-        balance: { amount: parseFloat(amount), currency },
-    });
-
-    // Log the payment history
-    await paymentHistoryUtils.createPaymentHistory({
-        user: new mongoose.Types.ObjectId(userId),
-        purpose: 'Balance added to wallet',
-        amount: parseFloat(amount),
-        transactionId,
-        currency,
-        paymentType: 'credit',
-    });
-
-    // Send notification
-    await notificationUtils.createNotification({
-        consumer: new mongoose.Types.ObjectId(userId),
-        content: {
-            title: 'Wallet recharged successfully',
-            message: `You have added ${amount} ${currency} to your wallet.`,
-            source: {
-                type: 'wallet',
-                id: wallet._id as unknown as Types.ObjectId,
-            },
-        },
-    });
+    if (transactionStatus !== 'COMPLETED') {
+        return sendResponse(res, {
+            statusCode: StatusCodes.BAD_REQUEST,
+            status: 'fail',
+            message: 'Payment not completed. Please try again.',
+        });
+    }
 
     sendResponse(res, {
         statusCode: StatusCodes.OK,
         status: 'success',
-        message: 'Wallet updated successfully',
-        data: wallet,
+        message: 'Payment Approved.',
+    });
+});
+
+// controller for cancel wallet top-up
+const cancelWalletTopUp = asyncHandler(async (req: Request, res: Response) => {
+    sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        status: 'success',
+        message: 'Wallet top up cancel',
     });
 });
 
 export default {
     getSpecificWalletByUserId,
     initiateWalletTopUp,
-    addBalanceToWallet,
+    returnWalletTopUp,
+    cancelWalletTopUp,
 };

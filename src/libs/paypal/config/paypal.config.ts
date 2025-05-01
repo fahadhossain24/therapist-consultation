@@ -5,6 +5,8 @@ dotenv.config({
     path: path.join(process.cwd(), '.env'),
 });
 
+const serverUrl = process.env.SERVER_URL;
+
 export const paypalConfig = {
     mode: process.env.PAYPAL_MODE,
     live: {
@@ -17,4 +19,6 @@ export const paypalConfig = {
         clientSecret: process.env.PAYPAL_SANDBOX_CLIENT_SECRET,
         baseUrl: process.env.PAYPAL_SANDBOX_BASE_URL,
     },
+    return_url: `${serverUrl}/v1/wallet/top-up/return`,
+    cancel_url: `${serverUrl}/v1/wallet/top-up/cancel`,
 };

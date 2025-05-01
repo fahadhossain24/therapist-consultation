@@ -8,11 +8,9 @@ walletRouter.get('/retrive/user/:userId', walletControllers.getSpecificWalletByU
 
 walletRouter.post('/initiate-top-up', authentication('patient'), walletControllers.initiateWalletTopUp);
 
-walletRouter.post('/add/balance', authentication('patient'), walletControllers.addBalanceToWallet);
+walletRouter.get('/top-up/return', walletControllers.returnWalletTopUp);
 
-// walletRouter.post('/add/balance/return', walletControllers.addBalanceToWallet);
-
-// walletRouter.post('/add/balance/cencel', walletControllers.addBalanceToWallet);
+walletRouter.get('/top-up/cancel', walletControllers.cancelWalletTopUp);
 
 
 export default walletRouter;
